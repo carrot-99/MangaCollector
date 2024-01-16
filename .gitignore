@@ -1,0 +1,29 @@
+# Xcode
+*.xcuserstate
+project.xcworkspace/
+xcuserdata/
+*.xccheckout
+*.xcworkspace
+DerivedData/
+
+# Swift Package Manager
+.build/
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Build artifacts
+*.o
+*.d
+*.hmap
+*.ipa
+*.dSYM/
+
+# Other
+.DS_Store
+*.log
+*.tmp
+*.temp
+
+GoogleService-Info.plist
