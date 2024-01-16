@@ -24,6 +24,8 @@ class MangaListViewModel: ObservableObject {
     
     func sortMangas() {
         switch sortOption {
+        case .defaultOrder:
+            break
         case .titleAscending:
             mangas.sort { $0.title ?? "" < $1.title ?? "" }
         case .titleDescending:

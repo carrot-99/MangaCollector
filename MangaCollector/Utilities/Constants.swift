@@ -31,7 +31,7 @@ enum ActiveSheet: Identifiable {
 }
 
 enum SortOption {
-    case titleAscending, titleDescending, volumeAscending, volumeDescending
+    case defaultOrder, titleAscending, titleDescending, volumeAscending, volumeDescending
 }
 
 enum FilterOption {

@@ -42,7 +42,6 @@ struct GraphView: View {
         .padding(.top, 20)
         .navigationTitle("統計")
         .padding(.horizontal)
-        .padding(.bottom, 100)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black)
     }
