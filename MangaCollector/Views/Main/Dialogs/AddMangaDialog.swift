@@ -31,7 +31,6 @@ struct AddMangaDialog: View {
                 }
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.black)
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }

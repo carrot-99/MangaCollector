@@ -38,17 +38,35 @@ class MangaListViewModel: ObservableObject {
     }
     
     func addManga(title: String) {
-        databaseService.addManga(title: title, ownedVolumes: 0, publicationStatus: 0, notes: "")
+        databaseService.addManga(title: title, ownedVolumes: 0, publicationStatus: 0, notes: "", favorite: false, image: nil, publisher: "選択なし")
         fetchMangas()
     }
     
-    func updateManga(_ manga: Manga, title: String, ownedVolumes: Int16, publicationStatus: Int16, notes: String) {
-        databaseService.updateManga(manga, title: title, ownedVolumes: ownedVolumes, publicationStatus: publicationStatus, notes: notes)
+    func updateManga(_ manga: Manga, title: String, ownedVolumes: Int16, publicationStatus: Int16, notes: String, favorite: Bool, image: Data?, publisher: String) -> Bool {
+        let result = databaseService.updateManga(manga, title: title, ownedVolumes: ownedVolumes, publicationStatus: publicationStatus, notes: notes, favorite: favorite, image: image, publisher: publisher)
         fetchMangas()
+        return result
     }
     
     func deleteManga(manga: Manga) {
         databaseService.deleteManga(manga)
+        fetchMangas()
+    }
+    
+    // MARK: - Author
+    
+    func addAuthor(to manga: Manga, name: String) {
+        databaseService.addAuthor(to: manga, name: name)
+        fetchMangas()
+    }
+    
+    func updateAuthor(author: Author, newName: String) {
+        databaseService.updateAuthor(author, newName: newName)
+        fetchMangas()
+    }
+    
+    func deleteAuthor(author: Author) {
+        databaseService.deleteAuthor(author)
         fetchMangas()
     }
     
@@ -92,6 +110,7 @@ class MangaListViewModel: ObservableObject {
         fetchMangas()
     }
     
+    // MARK: -
     
     func countTitlesByStatus() -> [PublicationStatus: Int] {
         var countDict: [PublicationStatus: Int] = [:]

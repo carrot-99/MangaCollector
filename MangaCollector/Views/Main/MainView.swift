@@ -1,19 +1,20 @@
-//  MangaListView.swift
+//  MainView.swift
 
 import SwiftUI
 
-struct MangaListView: View {
+struct MainView: View {
     @ObservedObject var viewModel: MangaListViewModel
     @State private var showingAddMangaDialog = false
     @State private var activeSheet: ActiveSheet?
     @State private var filterOption: FilterOption = .all
+    @State private var displayMode: DisplayMode = .list
     
     var totalOwnedVolumes: Int {
         filteredMangas.reduce(0) { total, manga in
             total + Int(manga.totalOwnedVolumes)
         }
     }
-    
+
     var filteredMangas: [Manga] {
         switch filterOption {
         case .all:
@@ -24,68 +25,38 @@ struct MangaListView: View {
             return viewModel.mangas.filter { $0.publicationStatus == PublicationStatus.completed.rawValue }
         case .incomplete:
             return viewModel.mangas.filter { $0.publicationStatus == PublicationStatus.incomplete.rawValue }
+        case .favorites:
+            return viewModel.mangas.filter { $0.favorite }
         }
     }
-
+    
     var body: some View {
         VStack {
             // 総数
-            NavigationLink(destination: GraphView(viewModel: viewModel)) {
-                HStack {
-                    Text("総巻数: \(totalOwnedVolumes)")
-                        .foregroundColor(.white)
-                    
-                    Spacer() // 左のテキストと右のアイコンの間にスペースを追加
-                    
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.white)
-                }
-                .padding()
-                .background(RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.blue, lineWidth: 2))
-                .padding(.horizontal)
+            TotalVolumesView(totalVolumes: totalOwnedVolumes, totalTitles: filteredMangas.count, filterOption: filterOption, viewModel: viewModel)
+
+            switch displayMode {
+            case .list:
+                MangaListView(filteredMangas: filteredMangas, viewModel: viewModel, deleteManga: deleteManga)
+            case .icons:
+                MangaIconsView(mangas: filteredMangas, viewModel: viewModel)
             }
-            .padding()
-            
-            // 漫画リスト
-            List {
-                ForEach(filteredMangas, id: \.self) { manga in
-                    NavigationLink(destination: MangaDetailView(manga: manga, viewModel: viewModel)) {
-                        MangaRow(manga: manga, viewModel: viewModel)
-                    }
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color.blue, lineWidth: 2))
-                    .padding(.horizontal)
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                }
-                .onDelete(perform: deleteManga)
-            }
-            .listStyle(.plain)
-            .padding(.bottom, 50)
         }
-        .background(Color.black)
-        .foregroundColor(.white)
         .navigationBarTitle("漫画リスト", displayMode: .inline)
         .navigationBarItems(
-            leading: 
+            leading: NavigationBarItemsView(
+                viewModel: viewModel,
+                onExportCSV: exportCSV,
+                onAddManga: { showingAddMangaDialog = true }
+            ),
+            trailing:
                 HStack {
-                    // 設定アイコン
-                    NavigationLink(destination: SettingsView()) {
-                        Image(systemName: "gearshape")
-                    }
-                    
+                    // 表示モード切り替えアイコン
                     Button(action: {
-                        let text = generateCSVText()
-                        let activityController = UIActivityViewController(activityItems: [text], applicationActivities: nil)
-                        UIApplication.shared.windows.first?.rootViewController?.present(activityController, animated: true, completion: nil)
+                        displayMode = displayMode == .list ? .icons : .list
                     }) {
-                        Image(systemName: "square.and.arrow.up")
+                        Image(systemName: displayMode == .list ? "rectangle.grid.2x2" : "list.dash")
                     }
-                },
-            trailing: 
-                HStack {
                     // フィルターアイコン
                     Button(action: {
                         self.activeSheet = .filter
@@ -98,12 +69,6 @@ struct MangaListView: View {
                     }) {
                         Image(systemName: "arrow.up.arrow.down")
                     }
-                    // 漫画追加ボタン
-                    Button(action: {
-                        self.showingAddMangaDialog = true
-                    }) {
-                        Image(systemName: "plus")
-                    }
                 }
         )
         .sheet(isPresented: $showingAddMangaDialog) {
@@ -111,7 +76,6 @@ struct MangaListView: View {
         }
         .actionSheet(item: $activeSheet) { sheet in
             switch sheet {
-                // ソート用アクションシート
             case .sort:
                 return ActionSheet(title: Text("ソート順を選択"), buttons: [
                     .default(Text("タイトル昇順")) {
@@ -132,13 +96,13 @@ struct MangaListView: View {
                     },
                     .cancel()
                 ])
-                // フィルター用アクションシート
             case .filter:
                 return ActionSheet(title: Text("フィルター選択"), buttons: [
                     .default(Text("全作品")) { filterOption = .all },
                     .default(Text("連載中作品")) { filterOption = .ongoing },
                     .default(Text("完結済作品")) { filterOption = .completed },
                     .default(Text("未完結作品")) { filterOption = .incomplete },
+                    .default(Text("お気に入り")) { filterOption = .favorites },
                     .cancel()
                 ])
             }
@@ -152,29 +116,10 @@ struct MangaListView: View {
         }
     }
     
-    private func calculateTitleSlices() -> [PieSliceData] {
-        let counts = viewModel.countTitlesByStatus()
-        return counts.map { status, count in
-            PieSliceData(value: Double(count), label: "label", color: color(for: status))
-        }
-    }
-
-    private func calculateVolumeSlices() -> [PieSliceData] {
-        let counts = viewModel.countVolumesByStatus()
-        return counts.map { status, count in
-            PieSliceData(value: Double(count), label: "label", color: color(for: status))
-        }
-    }
-    
-    private func color(for status: PublicationStatus) -> Color {
-        switch status {
-        case .ongoing:
-            return .red
-        case .completed:
-            return .green
-        case .incomplete:
-            return .yellow
-        }
+    private func exportCSV() {
+        let csvText = generateCSVText()
+        let activityController = UIActivityViewController(activityItems: [csvText], applicationActivities: nil)
+        UIApplication.shared.windows.first?.rootViewController?.present(activityController, animated: true, completion: nil)
     }
     
     private func generateCSVText() -> String {
@@ -192,7 +137,7 @@ struct MangaListView: View {
         csvText += "\n\(filterDescription)、\(sortDescription)に基づいた総所有巻数: \(filteredTotalOwnedVolumes)"
         return csvText
     }
-
+    
     private func filterOptionDescription() -> String {
         switch filterOption {
         case .all:
@@ -203,6 +148,8 @@ struct MangaListView: View {
             return "完結済作品"
         case .incomplete:
             return "未完結作品"
+        case .favorites:
+            return "お気に入り"
         }
     }
 

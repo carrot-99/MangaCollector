@@ -1,12 +1,13 @@
-//  AddOtherTitleDialog.swift
+//  EditOtherTitleDialog.swift
 
 import SwiftUI
 
-struct AddOtherTitleDialog: View {
+struct EditOtherTitleDialog: View {
     @Binding var showingDialog: Bool
-    @Binding var newOtherTitleName: String
-    @Binding var newOtherTitleOwnedVolumes: Int16
-    var onAdd: () -> Void
+    @Binding var editedOtherTitleName: String
+    @Binding var editedOtherTitleOwnedVolumes: Int16
+    var onSave: () -> Void
+    var onDelete: () -> Void
 
     var body: some View {
         NavigationView {
@@ -15,7 +16,7 @@ struct AddOtherTitleDialog: View {
                     .font(.caption)
                     .foregroundColor(.gray)
                     .padding(.bottom, 1)
-                TextField("タイトル", text: $newOtherTitleName)
+                TextField("タイトル", text: $editedOtherTitleName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.bottom, 5)
                 
@@ -23,24 +24,34 @@ struct AddOtherTitleDialog: View {
                     .font(.caption)
                     .foregroundColor(.gray)
                     .padding(.bottom, 1)
-                Picker("所有巻数", selection: $newOtherTitleOwnedVolumes) {
+                Picker("所有巻数", selection: $editedOtherTitleOwnedVolumes) {
                     ForEach(0...100, id: \.self) { number in
                         Text("\(number)巻").tag(Int16(number) as Int16)
                     }
                 }
             }
+            .padding(.horizontal)
             .navigationBarItems(
                 leading: Button("閉じる") {
                     showingDialog = false
                 },
-                trailing: Button("追加") {
-                    onAdd()
-                    showingDialog = false
+                trailing: HStack {
+                    Button("削除") {
+                        onDelete()
+                        showingDialog = false
+                    }
+                    .foregroundColor(.red)
+
+                    Spacer()
+
+                    Button("保存") {
+                        onSave()
+                        showingDialog = false
+                    }
                 }
             )
             .padding()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.black)
         }
     }
 }

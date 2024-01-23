@@ -20,7 +20,7 @@ struct HalfSheetViewModifier<SheetView: View>: ViewModifier {
                             }
 
                         VStack {
-                            Spacer()
+//                            Spacer()
                             sheetView
                                 .transition(.move(edge: .bottom))
                                 .edgesIgnoringSafeArea(.bottom)

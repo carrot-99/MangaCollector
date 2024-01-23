@@ -38,7 +38,6 @@ struct ListSectionView<Item: Identifiable & CustomStringConvertible>: View {
                             HStack {
                                 Text(item.description)
                                     .padding()
-                                    .foregroundColor(.white)
                                 Spacer()
                                 Button(action: { onEdit(item) }) {
                                     Image(systemName: "pencil")
@@ -51,7 +50,7 @@ struct ListSectionView<Item: Identifiable & CustomStringConvertible>: View {
                         }
                     }
                 }
-                .frame(minHeight: 50, maxHeight: 200)
+                .frame(minHeight: 150, maxHeight: 200)
             }
         }
         .padding()

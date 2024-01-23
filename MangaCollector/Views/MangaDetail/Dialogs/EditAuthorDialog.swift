@@ -1,26 +1,31 @@
-//  EditMissingVolumeDialog.swift
+//  EditAuthorDialog.swift
 
 import SwiftUI
 
-struct EditMissingVolumeDialog: View {
+struct EditAuthorDialog: View {
     @Binding var showingDialog: Bool
-    @Binding var editedVolumeNumber: Int16
-    var maxVolumeNumber: Int16
-    var onSave: () -> Void
-    var onDelete: () -> Void
+    @Binding var author: Author
+    @State private var authorName: String
+    var onEdit: (Author, String) -> Void
+    var onDelete: (Author) -> Void
+
+    init(showingDialog: Binding<Bool>, author: Binding<Author>, onEdit: @escaping (Author, String) -> Void, onDelete: @escaping (Author) -> Void) {
+        self._showingDialog = showingDialog
+        self._author = author
+        self._authorName = State(initialValue: author.wrappedValue.name ?? "")
+        self.onEdit = onEdit
+        self.onDelete = onDelete
+    }
 
     var body: some View {
         NavigationView {
             VStack(alignment: .leading) {
-                Text("不足巻数（編集）")
+                Text("著者名")
                     .font(.caption)
                     .foregroundColor(.gray)
                     .padding(.bottom, 1)
-                Picker("編集巻数", selection: $editedVolumeNumber) {
-                    ForEach(0...maxVolumeNumber, id: \.self) { number in
-                        Text("\(number)巻").tag(number as Int16)
-                    }
-                }
+                TextField("著者名", text: $authorName)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
             }
             .navigationBarItems(
                 leading: Button("閉じる") {
@@ -28,7 +33,7 @@ struct EditMissingVolumeDialog: View {
                 },
                 trailing: HStack {
                     Button("削除") {
-                        onDelete()
+                        onDelete(author)
                         showingDialog = false
                     }
                     .foregroundColor(.red)
@@ -36,14 +41,13 @@ struct EditMissingVolumeDialog: View {
                     Spacer()
 
                     Button("保存") {
-                        onSave()
+                        onEdit(author, authorName)
                         showingDialog = false
                     }
                 }
             )
             .padding()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.black)
         }
     }
 }

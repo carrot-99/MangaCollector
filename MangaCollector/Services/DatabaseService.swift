@@ -34,28 +34,64 @@ class DatabaseService {
         }
     }
 
-    func addManga(title: String, ownedVolumes: Int16, publicationStatus: Int16, notes: String) {
+    func addManga(title: String, ownedVolumes: Int16, publicationStatus: Int16, notes: String, favorite: Bool, image: Data?, publisher: String) {
         let newManga = Manga(context: context)
         newManga.title = title
         newManga.ownedVolumes = ownedVolumes
+        newManga.totalOwnedVolumes = 0
         newManga.publicationStatus = publicationStatus
         newManga.notes = notes
+        newManga.favorite = false
+        newManga.image = nil
+        newManga.publisher = "選択なし"
 
         saveContext()
     }
 
-    func updateManga(_ manga: Manga, title: String, ownedVolumes: Int16, publicationStatus: Int16, notes: String) {
+    func updateManga(_ manga: Manga, title: String, ownedVolumes: Int16, publicationStatus: Int16, notes: String, favorite: Bool, image: Data?, publisher: String) -> Bool {
+        guard !title.isEmpty, ownedVolumes >= 0 else {
+            return false
+        }
+
         manga.title = title
         manga.ownedVolumes = ownedVolumes
         manga.publicationStatus = publicationStatus
         manga.notes = notes
-        manga.updateTotalOwnedVolumes()
+        manga.favorite = favorite
+        manga.image = image
+        manga.publisher = publisher
 
-        saveContext()
+        do {
+            try context.save()
+            return true
+        } catch {
+            print("Error updating manga: \(error.localizedDescription)")
+            return false
+        }
     }
+
 
     func deleteManga(_ manga: Manga) {
         context.delete(manga)
+        saveContext()
+    }
+    
+    // MARK: - Author
+    
+    func addAuthor(to manga: Manga, name: String) {
+        let newAuthor = Author(context: context)
+        newAuthor.name = name
+         manga.addToAuthors(newAuthor)
+         saveContext()
+    }
+    
+    func updateAuthor(_ author: Author, newName: String) {
+        author.name = newName
+        saveContext()
+    }
+    
+    func deleteAuthor(_ author: Author) {
+        context.delete(author)
         saveContext()
     }
 
