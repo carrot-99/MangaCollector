@@ -6,11 +6,10 @@ struct MangaIconsView: View {
     var mangas: [Manga]
     var viewModel: MangaListViewModel
 
-    let columns = [
-        GridItem(.flexible()),
-        GridItem(.flexible()),
-        GridItem(.flexible())
-    ]
+    private var columns: [GridItem] {
+        let numberOfColumns = UIDevice.current.userInterfaceIdiom == .pad ? 6 : 3
+        return Array(repeating: GridItem(.flexible()), count: numberOfColumns)
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -21,7 +20,7 @@ struct MangaIconsView: View {
                             VStack {
                                 ZStack(alignment: .topTrailing) {
                                     MangaImage(manga: manga)
-                                        .frame(width: geometry.size.width / 3 - 50, height: 100)
+                                        .frame(width: geometry.size.width / CGFloat(columns.count) - 50, height: 100)
                                         .shadow(radius: 5)
 
                                     if manga.totalOwnedVolumes > 0 {

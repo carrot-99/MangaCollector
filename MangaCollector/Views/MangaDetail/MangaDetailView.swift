@@ -63,11 +63,11 @@ struct MangaDetailView: View {
                     Spacer()
                     FavoriteView(isFavorite: $isFavorite)
                 }
-                .padding(.bottom, 10)
+//                .padding(.bottom, 10)
                 
                 // 著者リスト
-                AuthorsListView(manga: manga, authors: Array(manga.authors as? Set<Author> ?? []), viewModel: viewModel)
-                    .frame(height: 120)
+                AuthorsListView(manga: manga, authors: Array(manga.authors as? Set<Author> ?? []), viewModel: viewModel, currentAlert: $currentAlert)
+                    .frame(height: 100)
                 
                 // 画像
                 ImageView(image: $image, showingImagePicker: $showingImagePicker)
@@ -84,7 +84,7 @@ struct MangaDetailView: View {
                 PublisherView(publisher: $publisher)
                 
                 // 不足巻数リスト
-                MissingVolumesListView(manga: manga, newMissingVolumeNumber: $newMissingVolumeNumber, editingVolume: $editingVolume, editedVolumeNumber: $editedVolumeNumber, viewModel: viewModel, ownedVolumes: $ownedVolumes)
+                MissingVolumesListView(manga: manga, newMissingVolumeNumber: $newMissingVolumeNumber, editingVolume: $editingVolume, editedVolumeNumber: $editedVolumeNumber, viewModel: viewModel, ownedVolumes: $ownedVolumes, currentAlert: $currentAlert)
                 
                 // 外伝などリスト
                 OtherTitlesListView(manga: manga, viewModel: viewModel, newOtherTitleName: $newOtherTitleName, newOtherTitleOwnedVolumes: $newOtherTitleOwnedVolumes, newOtherTitleNotes: $newOtherTitleNotes, editingOtherTitle: $editingOtherTitle, editedOtherTitleName: $editedOtherTitleName, editedOtherTitleOwnedVolumes: $editedOtherTitleOwnedVolumes, editedOtherTitleNotes: $editedOtherTitleNotes)
@@ -120,6 +120,12 @@ struct MangaDetailView: View {
                     message: Text("タイトルを入力してください。"),
                     dismissButton: .default(Text("OK"))
                 )
+            case .authorNameError:
+                return Alert(
+                    title: Text("エラー"),
+                    message: Text("著者名を入力してください。"),
+                    dismissButton: .default(Text("OK"))
+                )
             }
         }
     }
@@ -130,11 +136,12 @@ struct MangaDetailView: View {
             total + Int(otherTitle.ownedVolumes)
         }
         let total = ownedVolumes + otherTitlesOwnedVolumesTotal - missingVolumeCount
-        return total > 0 ? total : 0
+        return max(total, 0)
     }
 
     private func saveChanges() {
         let imageData = image?.jpegData(compressionQuality: 1.0)
+        let totalOwnedVolumes = calculatedOwnedVolumes()
         let updateSuccessful = viewModel.updateManga(
             manga,
             title: title,
@@ -143,7 +150,8 @@ struct MangaDetailView: View {
             notes: notes,
             favorite: isFavorite,
             image: imageData,
-            publisher: publisher
+            publisher: publisher,
+            totalOwnedVolumes: Int16(totalOwnedVolumes)
         )
         currentAlert = updateSuccessful ? .saveSuccess : .saveFailure
     }

@@ -318,12 +318,12 @@
 		CEAF619A2B4E3F9C001EA0DE /* Dialogs */ = {
 			isa = PBXGroup;
 			children = (
+				CE90C8292B57D55C005D9184 /* AddAuthorDialog.swift */,
+				CE90C82B2B57DE13005D9184 /* EditAuthorDialog.swift */,
 				CE763FB52B50204F00C14132 /* AddMissingVolumeDialog.swift */,
 				CE763FB72B50206600C14132 /* EditMissingVolumeDialog.swift */,
 				CE763FB92B50207900C14132 /* AddOtherTitleDialog.swift */,
 				CE763FBB2B50215600C14132 /* EditOtherTitleDialog.swift */,
-				CE90C8292B57D55C005D9184 /* AddAuthorDialog.swift */,
-				CE90C82B2B57DE13005D9184 /* EditAuthorDialog.swift */,
 			);
 			path = Dialogs;
 			sourceTree = "<group>";

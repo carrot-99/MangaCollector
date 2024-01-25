@@ -9,6 +9,7 @@ struct AuthorsListView: View {
     @State private var showingAddAuthorDialog = false
     @State private var showingEditAuthorDialog = false
     @State private var selectedAuthor: Author?
+    @Binding var currentAlert: AlertType?
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -50,7 +51,7 @@ struct AuthorsListView: View {
         }
         .padding()
         .halfSheet(isPresented: $showingAddAuthorDialog) {
-            AddAuthorDialog(showingDialog: $showingAddAuthorDialog) { name in
+            AddAuthorDialog(showingDialog: $showingAddAuthorDialog, currentAlert: $currentAlert) { name in
                 addAuthor(authorName: name)
             }
         }
@@ -58,7 +59,7 @@ struct AuthorsListView: View {
             if let selectedAuthor = selectedAuthor {
                 EditAuthorDialog(
                     showingDialog: $showingEditAuthorDialog,
-                    author: .constant(selectedAuthor),
+                    author: .constant(selectedAuthor), currentAlert: $currentAlert,
                     onEdit: { author, newName in
                         updateAuthor(author: author, newName: newName)
                     },

@@ -42,8 +42,8 @@ class MangaListViewModel: ObservableObject {
         fetchMangas()
     }
     
-    func updateManga(_ manga: Manga, title: String, ownedVolumes: Int16, publicationStatus: Int16, notes: String, favorite: Bool, image: Data?, publisher: String) -> Bool {
-        let result = databaseService.updateManga(manga, title: title, ownedVolumes: ownedVolumes, publicationStatus: publicationStatus, notes: notes, favorite: favorite, image: image, publisher: publisher)
+    func updateManga(_ manga: Manga, title: String, ownedVolumes: Int16, publicationStatus: Int16, notes: String, favorite: Bool, image: Data?, publisher: String, totalOwnedVolumes: Int16) -> Bool {
+        let result = databaseService.updateManga(manga, title: title, ownedVolumes: ownedVolumes, publicationStatus: publicationStatus, notes: notes, favorite: favorite, image: image, publisher: publisher, totalOwnedVolumes: totalOwnedVolumes)
         fetchMangas()
         return result
     }
@@ -72,19 +72,23 @@ class MangaListViewModel: ObservableObject {
     
     // MARK: - MissingVolume
     
-    func addMissingVolume(to manga: Manga, volumeNumber: Int16) {
+    func addMissingVolume(to manga: Manga, volumeNumber: Int16) -> Bool {
         if databaseService.addMissingVolume(to: manga, volumeNumber: volumeNumber) {
             fetchMangas()
+            return true
         } else {
             duplicateVolumeAlert = true
+            return false
         }
     }
     
-    func updateMissingVolume(manga: Manga, volume: MissingVolume, newVolumeNumber: Int16) {
+    func updateMissingVolume(manga: Manga, volume: MissingVolume, newVolumeNumber: Int16) -> Bool {
         if databaseService.updateMissingVolume(manga: manga, volume: volume, newVolumeNumber: newVolumeNumber) {
             fetchMangas()
+            return true
         } else {
             duplicateVolumeAlert = true
+            return false
         }
     }
     

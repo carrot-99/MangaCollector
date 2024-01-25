@@ -8,26 +8,28 @@ struct PublisherGraphView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
+            // 出版社別の作品数の円グラフ
             Label("出版社別作品数", systemImage: "chart.pie")
                 .font(.caption)
                 .foregroundColor(.gray)
                 .padding(.bottom, 1)
-
             DoughnutChart(chartData: chartDataForTitles())
                 .padding()
-                .frame(height: 250)
+                .frame(height: graphHeight)
 
             Spacer()
+                .padding(50)
 
+            // 出版社別の巻数の円グラフ
             Label("出版社別巻数", systemImage: "chart.pie")
                 .font(.caption)
                 .foregroundColor(.gray)
                 .padding(.bottom, 1)
-
             DoughnutChart(chartData: chartDataForVolumes())
                 .padding()
-                .frame(height: 250)
+                .frame(height: graphHeight)
         }
+        .padding(.horizontal)
     }
 
     private func chartDataForTitles() -> DoughnutChartData {

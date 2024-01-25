@@ -18,7 +18,6 @@ struct GraphView: View {
             
             if viewModel.mangas.isEmpty {
                 Text("表示するデータがありません")
-                    .foregroundColor(.white)
                     .padding()
             } else {
                 VStack {

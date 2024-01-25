@@ -7,31 +7,29 @@ struct PublicationStatusGraphView: View {
     @ObservedObject var viewModel: MangaListViewModel
     
     var body: some View {
-        VStack {
-             VStack(alignment: .leading) {
-                 // 連載状況別の作品数の円グラフ
-                 Label("連載状況別作品数", systemImage: "chart.pie")
-                     .font(.caption)
-                     .foregroundColor(.gray)
-                     .padding(.bottom, 1)
-                 DoughnutChart(chartData: chartDataForTitles())
-                     .padding(.top, 20)
-                     .frame(height: 250)
-             }
-             
+        VStack(alignment: .leading) {
+             // 連載状況別の作品数の円グラフ
+             Label("連載状況別作品数", systemImage: "chart.pie")
+                 .font(.caption)
+                 .foregroundColor(.gray)
+                 .padding(.bottom, 1)
+             DoughnutChart(chartData: chartDataForTitles())
+                 .padding()
+                 .frame(height: graphHeight)
+         
              Spacer()
-             
-             VStack(alignment: .leading) {
-                 // 連載状況別の巻数の円グラフ
-                 Label("連載状況別巻数", systemImage: "chart.pie")
-                     .font(.caption)
-                     .foregroundColor(.gray)
-                     .padding(.bottom, 1)
-                 DoughnutChart(chartData: chartDataForVolumes())
-                     .padding(.top, 20)
-                     .frame(height: 250)
-             }
+                .padding(50)
+
+             // 連載状況別の巻数の円グラフ
+             Label("連載状況別巻数", systemImage: "chart.pie")
+                 .font(.caption)
+                 .foregroundColor(.gray)
+                 .padding(.bottom, 1)
+             DoughnutChart(chartData: chartDataForVolumes())
+                 .padding()
+                 .frame(height: graphHeight)
          }
+        .padding(.horizontal)
     }
     
     private func chartDataForTitles() -> DoughnutChartData {
