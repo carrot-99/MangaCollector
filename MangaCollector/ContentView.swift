@@ -20,8 +20,8 @@ struct ContentView: View {
                 }
                 .navigationViewStyle(StackNavigationViewStyle())
                 
-                AdMobBannerView()
-                    .frame(width: UIScreen.main.bounds.width, height: 40)
+//                AdMobBannerView()
+//                    .frame(width: UIScreen.main.bounds.width, height: 40)
             }
         } else {
             TermsAndPrivacyAgreementView(isShowingTerms: $isShowingTerms, hasAgreedToTerms: $hasAgreedToTerms)

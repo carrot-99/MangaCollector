@@ -78,7 +78,7 @@ struct AddOtherTitleDialog: View {
                 .foregroundColor(.gray)
                 .padding(.bottom, 1)
             Picker("所有巻数", selection: $newOtherTitleOwnedVolumes) {
-                ForEach(0...100, id: \.self) { number in
+                ForEach(1...100, id: \.self) { number in
                     Text("\(number)巻").tag(Int16(number) as Int16)
                 }
             }

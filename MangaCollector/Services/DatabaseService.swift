@@ -34,18 +34,19 @@ class DatabaseService {
         }
     }
 
-    func addManga(title: String, ownedVolumes: Int16, publicationStatus: Int16, notes: String, favorite: Bool, image: Data?, publisher: String) {
+    func addManga(title: String, authorName: String, publicationStatus: Int16, ownedVolumes: Int16, image: Data?) {
         let newManga = Manga(context: context)
         newManga.title = title
         newManga.ownedVolumes = ownedVolumes
-        newManga.totalOwnedVolumes = 0
         newManga.publicationStatus = publicationStatus
-        newManga.notes = notes
-        newManga.favorite = false
-        newManga.image = nil
-        newManga.publisher = "選択なし"
-
-        saveContext()
+        newManga.image = image
+        
+        // 著者情報の設定
+        let author = Author(context: context)
+        author.name = authorName
+        newManga.addToAuthors(author)
+        
+        saveContext()  // CoreDataのコンテキストを保存
     }
 
     func updateManga(_ manga: Manga, title: String, ownedVolumes: Int16, publicationStatus: Int16, notes: String, favorite: Bool, image: Data?, publisher: String, totalOwnedVolumes: Int16) -> Bool {

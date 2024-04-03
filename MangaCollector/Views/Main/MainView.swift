@@ -72,7 +72,7 @@ struct MainView: View {
                 }
         )
         .sheet(isPresented: $showingAddMangaDialog) {
-            AddMangaDialog(viewModel: viewModel)
+            AddMangaDialog(isPresented: $showingAddMangaDialog, viewModel: viewModel)
         }
         .actionSheet(item: $activeSheet) { sheet in
             switch sheet {

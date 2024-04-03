@@ -37,9 +37,16 @@ class MangaListViewModel: ObservableObject {
         }
     }
     
-    func addManga(title: String) {
-        databaseService.addManga(title: title, ownedVolumes: 0, publicationStatus: 0, notes: "", favorite: false, image: nil, publisher: "選択なし")
-        fetchMangas()
+    func addManga(title: String, authorName: String, publicationStatus: Int16, ownedVolumes: Int16, image: Data?) {
+        // DatabaseServiceを使用して新しい漫画をデータベースに追加
+        databaseService.addManga(
+            title: title,
+            authorName: authorName,
+            publicationStatus: publicationStatus,
+            ownedVolumes: ownedVolumes,
+            image: image
+        )
+        fetchMangas()  // データベースから漫画のリストを再取得して更新
     }
     
     func updateManga(_ manga: Manga, title: String, ownedVolumes: Int16, publicationStatus: Int16, notes: String, favorite: Bool, image: Data?, publisher: String, totalOwnedVolumes: Int16) -> Bool {

@@ -52,7 +52,7 @@ struct OtherTitlesListView: View {
     private func addOtherTitle() {
         viewModel.addOtherTitle(to: manga, title: newOtherTitleName, ownedVolumes: newOtherTitleOwnedVolumes, notes: newOtherTitleNotes)
         newOtherTitleName = ""
-        newOtherTitleOwnedVolumes = 0
+        newOtherTitleOwnedVolumes = 1
         newOtherTitleNotes = ""
         showingAddOtherTitleDialog = false
     }

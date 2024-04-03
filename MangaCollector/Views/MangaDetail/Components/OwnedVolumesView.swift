@@ -13,7 +13,7 @@ struct OwnedVolumesView: View {
                 .padding(.bottom, 1)
             
             Picker("所持巻数", selection: $ownedVolumes) {
-                ForEach(0..<300) { volume in
+                ForEach(1..<300) { volume in
                     Text("\(volume)巻").tag(volume)
                 }
             }
