@@ -5,9 +5,10 @@ import SwiftUI
 struct MainView: View {
     @ObservedObject var viewModel: MangaListViewModel
     @State private var showingAddMangaDialog = false
-    @State private var activeSheet: ActiveSheet?
     @State private var filterOption: FilterOption = .all
     @State private var displayMode: DisplayMode = .list
+    @State private var searchText = ""
+    @State private var showSearchBar = false
     
     var totalOwnedVolumes: Int {
         filteredMangas.reduce(0) { total, manga in
@@ -16,17 +17,21 @@ struct MainView: View {
     }
 
     var filteredMangas: [Manga] {
-        switch filterOption {
-        case .all:
-            return viewModel.mangas
-        case .ongoing:
-            return viewModel.mangas.filter { $0.publicationStatus == PublicationStatus.ongoing.rawValue }
-        case .completed:
-            return viewModel.mangas.filter { $0.publicationStatus == PublicationStatus.completed.rawValue }
-        case .incomplete:
-            return viewModel.mangas.filter { $0.publicationStatus == PublicationStatus.incomplete.rawValue }
-        case .favorites:
-            return viewModel.mangas.filter { $0.favorite }
+        viewModel.mangas.filter { manga in
+            (searchText.isEmpty || manga.title?.localizedCaseInsensitiveContains(searchText) == true)
+        }.filter { manga in
+            switch filterOption {
+            case .all:
+                return true
+            case .ongoing:
+                return manga.publicationStatus == PublicationStatus.ongoing.rawValue
+            case .completed:
+                return manga.publicationStatus == PublicationStatus.completed.rawValue
+            case .incomplete:
+                return manga.publicationStatus == PublicationStatus.incomplete.rawValue
+            case .favorites:
+                return manga.favorite
+            }
         }
     }
     
@@ -34,78 +39,83 @@ struct MainView: View {
         VStack {
             // 総数
             TotalVolumesView(totalVolumes: totalOwnedVolumes, totalTitles: filteredMangas.count, filterOption: filterOption, viewModel: viewModel)
+            
+            if showSearchBar {
+                SearchBar(text: $searchText).padding()
+            }
 
             switch displayMode {
             case .list:
                 MangaListView(filteredMangas: filteredMangas, viewModel: viewModel, deleteManga: deleteManga)
+                    .padding(.bottom, 40)
             case .icons:
                 MangaIconsView(mangas: filteredMangas, viewModel: viewModel)
+                    .padding(.bottom, 40)
             }
         }
         .navigationBarTitle("漫画リスト", displayMode: .inline)
-        .navigationBarItems(
-            leading: NavigationBarItemsView(
-                viewModel: viewModel,
-                onExportCSV: exportCSV,
-                onAddManga: { showingAddMangaDialog = true }
-            ),
-            trailing:
-                HStack {
-                    // 表示モード切り替えアイコン
-                    Button(action: {
-                        displayMode = displayMode == .list ? .icons : .list
-                    }) {
-                        Image(systemName: displayMode == .list ? "rectangle.grid.2x2" : "list.dash")
-                    }
-                    // フィルターアイコン
-                    Button(action: {
-                        self.activeSheet = .filter
-                    }) {
-                        Image(systemName: "line.horizontal.3.decrease.circle")
-                    }
-                    // ソートアイコン
-                    Button(action: {
-                        self.activeSheet = .sort
-                    }) {
-                        Image(systemName: "arrow.up.arrow.down")
-                    }
-                }
-        )
+        .navigationBarItems(leading: addButton, trailing: toolbarMenu)
         .sheet(isPresented: $showingAddMangaDialog) {
             AddMangaDialog(isPresented: $showingAddMangaDialog, viewModel: viewModel)
         }
-        .actionSheet(item: $activeSheet) { sheet in
-            switch sheet {
-            case .sort:
-                return ActionSheet(title: Text("ソート順を選択"), buttons: [
-                    .default(Text("タイトル昇順")) {
-                        viewModel.sortOption = .titleAscending
-                        viewModel.sortMangas()
-                    },
-                    .default(Text("タイトル降順")) {
-                        viewModel.sortOption = .titleDescending
-                        viewModel.sortMangas()
-                    },
-                    .default(Text("巻数昇順")) {
-                        viewModel.sortOption = .volumeAscending
-                        viewModel.sortMangas()
-                    },
-                    .default(Text("巻数降順")) {
-                        viewModel.sortOption = .volumeDescending
-                        viewModel.sortMangas()
-                    },
-                    .cancel()
-                ])
-            case .filter:
-                return ActionSheet(title: Text("フィルター選択"), buttons: [
-                    .default(Text("全作品")) { filterOption = .all },
-                    .default(Text("連載中作品")) { filterOption = .ongoing },
-                    .default(Text("完結済作品")) { filterOption = .completed },
-                    .default(Text("未完結作品")) { filterOption = .incomplete },
-                    .default(Text("お気に入り")) { filterOption = .favorites },
-                    .cancel()
-                ])
+    }
+    
+    var addButton: some View {
+        Button(action: { showingAddMangaDialog = true }) {
+            Image(systemName: "plus")
+        }
+    }
+    
+    var toolbarMenu: some View {
+        Menu {
+            Button(showSearchBar ? "検索バーを隠す" : "検索バーを表示") {
+                showSearchBar.toggle() 
             }
+            Divider()
+            filterMenu
+            Divider()
+            sortMenu
+            Divider()
+            displayModeMenu
+        } label: {
+            Image(systemName: "ellipsis.circle")
+        }
+    }
+
+    var filterMenu: some View {
+        Group {
+            Button("全作品") { filterOption = .all }
+            Button("お気に入り") { filterOption = .favorites }
+            Button("連載中") { filterOption = .ongoing }
+            Button("完結済み") { filterOption = .completed }
+            Button("未完結") { filterOption = .incomplete }
+        }
+    }
+
+    var sortMenu: some View {
+        Group {
+            Button("タイトル昇順") {
+                viewModel.sortOption = .titleAscending
+                viewModel.sortMangas()
+            }
+            Button("タイトル降順") {
+                viewModel.sortOption = .titleDescending
+                viewModel.sortMangas()
+            }
+            Button("巻数昇順") {
+                viewModel.sortOption = .volumeAscending
+                viewModel.sortMangas()
+            }
+            Button("巻数降順") {
+                viewModel.sortOption = .volumeDescending
+                viewModel.sortMangas()
+            }
+        }
+    }
+
+    var displayModeMenu: some View {
+        Button(displayMode == .list ? "アイコン表示" : "リスト表示") {
+            displayMode = displayMode == .list ? .icons : .list
         }
     }
     

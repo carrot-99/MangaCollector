@@ -42,6 +42,7 @@
 		CE90C83E2B5FA945005D9184 /* TermsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE90C83D2B5FA945005D9184 /* TermsView.swift */; };
 		CE90C8402B5FA985005D9184 /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE90C83F2B5FA985005D9184 /* PrivacyPolicyView.swift */; };
 		CE90C8422B5FAAB2005D9184 /* TermsAndPrivacyAgreementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE90C8412B5FAAB2005D9184 /* TermsAndPrivacyAgreementView.swift */; };
+		CE93E5D22BBE6FB60070D84E /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE93E5D12BBE6FB60070D84E /* SearchBar.swift */; };
 		CEAF61752B4D7A81001EA0DE /* MangaCollectorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF61742B4D7A81001EA0DE /* MangaCollectorApp.swift */; };
 		CEAF61772B4D7A81001EA0DE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF61762B4D7A81001EA0DE /* ContentView.swift */; };
 		CEAF61792B4D7A82001EA0DE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CEAF61782B4D7A82001EA0DE /* Assets.xcassets */; };
@@ -95,6 +96,7 @@
 		CE90C83D2B5FA945005D9184 /* TermsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsView.swift; sourceTree = "<group>"; };
 		CE90C83F2B5FA985005D9184 /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
 		CE90C8412B5FAAB2005D9184 /* TermsAndPrivacyAgreementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsAndPrivacyAgreementView.swift; sourceTree = "<group>"; };
+		CE93E5D12BBE6FB60070D84E /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		CEAF61712B4D7A81001EA0DE /* MangaCollector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MangaCollector.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEAF61742B4D7A81001EA0DE /* MangaCollectorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangaCollectorApp.swift; sourceTree = "<group>"; };
 		CEAF61762B4D7A81001EA0DE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -303,6 +305,7 @@
 				CEAF61882B4E25B2001EA0DE /* MangaListView.swift */,
 				CEAF618F2B4E27CD001EA0DE /* MangaRow.swift */,
 				CE90C8332B5914FE005D9184 /* MangaIconsView.swift */,
+				CE93E5D12BBE6FB60070D84E /* SearchBar.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -502,6 +505,7 @@
 				CEAF61952B4E3044001EA0DE /* AddMangaDialog.swift in Sources */,
 				CE90C8182B57A9C1005D9184 /* ImageView.swift in Sources */,
 				CEAF61752B4D7A81001EA0DE /* MangaCollectorApp.swift in Sources */,
+				CE93E5D22BBE6FB60070D84E /* SearchBar.swift in Sources */,
 				CE763FB02B501F8500C14132 /* TitleView.swift in Sources */,
 				CE90C8052B55F1F1005D9184 /* GraphView.swift in Sources */,
 				CE90C81A2B57A9FE005D9184 /* PublisherView.swift in Sources */,
