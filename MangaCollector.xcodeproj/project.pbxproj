@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -58,6 +58,16 @@
 		CEAF61C12B4E887C001EA0DE /* Manga.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF61C02B4E887C001EA0DE /* Manga.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		CEAF5A122CE995C100C8B9BB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CEAF61692B4D7A81001EA0DE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CEAF61702B4D7A81001EA0DE;
+			remoteInfo = MangaCollector;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		75D3585B58F8195ECE58973E /* Pods-MangaCollector.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MangaCollector.release.xcconfig"; path = "Target Support Files/Pods-MangaCollector/Pods-MangaCollector.release.xcconfig"; sourceTree = "<group>"; };
 		A743C433FC76DA71932CC6F0 /* Pods_MangaCollector.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MangaCollector.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -97,6 +107,8 @@
 		CE90C83F2B5FA985005D9184 /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
 		CE90C8412B5FAAB2005D9184 /* TermsAndPrivacyAgreementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsAndPrivacyAgreementView.swift; sourceTree = "<group>"; };
 		CE93E5D12BBE6FB60070D84E /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
+		CEAF5A092CE8E31700C8B9BB /* MangaCollector 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "MangaCollector 3.xcdatamodel"; sourceTree = "<group>"; };
+		CEAF5A0E2CE995C100C8B9BB /* MangaCollectorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MangaCollectorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEAF61712B4D7A81001EA0DE /* MangaCollector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MangaCollector.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEAF61742B4D7A81001EA0DE /* MangaCollectorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangaCollectorApp.swift; sourceTree = "<group>"; };
 		CEAF61762B4D7A81001EA0DE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -114,7 +126,18 @@
 		CEAF61C02B4E887C001EA0DE /* Manga.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Manga.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		CEAF5A0F2CE995C100C8B9BB /* MangaCollectorTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MangaCollectorTests; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		CEAF5A0B2CE995C100C8B9BB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CEAF616E2B4D7A81001EA0DE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -230,6 +253,7 @@
 			isa = PBXGroup;
 			children = (
 				CEAF61732B4D7A81001EA0DE /* MangaCollector */,
+				CEAF5A0F2CE995C100C8B9BB /* MangaCollectorTests */,
 				CEAF61722B4D7A81001EA0DE /* Products */,
 				C0D7A51994AE9D9E868DAB56 /* Pods */,
 				0E4AE9B3EB153606FF0C4DB6 /* Frameworks */,
@@ -240,6 +264,7 @@
 			isa = PBXGroup;
 			children = (
 				CEAF61712B4D7A81001EA0DE /* MangaCollector.app */,
+				CEAF5A0E2CE995C100C8B9BB /* MangaCollectorTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -356,6 +381,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		CEAF5A0D2CE995C100C8B9BB /* MangaCollectorTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CEAF5A142CE995C100C8B9BB /* Build configuration list for PBXNativeTarget "MangaCollectorTests" */;
+			buildPhases = (
+				CEAF5A0A2CE995C100C8B9BB /* Sources */,
+				CEAF5A0B2CE995C100C8B9BB /* Frameworks */,
+				CEAF5A0C2CE995C100C8B9BB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CEAF5A132CE995C100C8B9BB /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				CEAF5A0F2CE995C100C8B9BB /* MangaCollectorTests */,
+			);
+			name = MangaCollectorTests;
+			packageProductDependencies = (
+			);
+			productName = MangaCollectorTests;
+			productReference = CEAF5A0E2CE995C100C8B9BB /* MangaCollectorTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		CEAF61702B4D7A81001EA0DE /* MangaCollector */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEAF61842B4D7A82001EA0DE /* Build configuration list for PBXNativeTarget "MangaCollector" */;
@@ -385,9 +433,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1510;
+				LastSwiftUpdateCheck = 1610;
 				LastUpgradeCheck = 1510;
 				TargetAttributes = {
+					CEAF5A0D2CE995C100C8B9BB = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = CEAF61702B4D7A81001EA0DE;
+					};
 					CEAF61702B4D7A81001EA0DE = {
 						CreatedOnToolsVersion = 15.1;
 					};
@@ -410,11 +462,19 @@
 			projectRoot = "";
 			targets = (
 				CEAF61702B4D7A81001EA0DE /* MangaCollector */,
+				CEAF5A0D2CE995C100C8B9BB /* MangaCollectorTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		CEAF5A0C2CE995C100C8B9BB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CEAF616F2B4D7A81001EA0DE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -469,6 +529,13 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		CEAF5A0A2CE995C100C8B9BB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CEAF616D2B4D7A81001EA0DE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -523,7 +590,51 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		CEAF5A132CE995C100C8B9BB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CEAF61702B4D7A81001EA0DE /* MangaCollector */;
+			targetProxy = CEAF5A122CE995C100C8B9BB /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		CEAF5A152CE995C100C8B9BB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.carrot.MangaCollectorTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MangaCollector.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MangaCollector";
+			};
+			name = Debug;
+		};
+		CEAF5A162CE995C100C8B9BB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.carrot.MangaCollectorTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MangaCollector.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MangaCollector";
+			};
+			name = Release;
+		};
 		CEAF61822B4D7A82001EA0DE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -714,6 +825,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		CEAF5A142CE995C100C8B9BB /* Build configuration list for PBXNativeTarget "MangaCollectorTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CEAF5A152CE995C100C8B9BB /* Debug */,
+				CEAF5A162CE995C100C8B9BB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		CEAF616C2B4D7A81001EA0DE /* Build configuration list for PBXProject "MangaCollector" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -757,10 +877,11 @@
 		CEAF617F2B4D7A82001EA0DE /* MangaCollector.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				CEAF5A092CE8E31700C8B9BB /* MangaCollector 3.xcdatamodel */,
 				CEAF61BC2B4E8512001EA0DE /* MangaCollector 2.xcdatamodel */,
 				CEAF61802B4D7A82001EA0DE /* MangaCollector.xcdatamodel */,
 			);
-			currentVersion = CEAF61802B4D7A82001EA0DE /* MangaCollector.xcdatamodel */;
+			currentVersion = CEAF5A092CE8E31700C8B9BB /* MangaCollector 3.xcdatamodel */;
 			path = MangaCollector.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

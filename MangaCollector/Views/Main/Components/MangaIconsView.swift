@@ -54,9 +54,9 @@ struct MangaIconsView: View {
 
     private func authorsString(_ authors: NSSet?) -> String {
         guard let authorsSet = authors as? Set<Author>, !authorsSet.isEmpty else {
-            return "著者不明"
+            return ""
         }
-        return authorsSet.map { $0.name ?? "不明" }.joined(separator: " / ")
+        return authorsSet.map { $0.name ?? "" }.joined(separator: " / ")
     }
 
     @ViewBuilder

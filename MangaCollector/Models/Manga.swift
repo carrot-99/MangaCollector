@@ -20,7 +20,7 @@ extension Manga {
     }
     
     var calculatedOwnedVolumes: Int {
-        let missingVolumeCount = (self.missingVolumes as? Set<MissingVolume>)?.count ?? 0
+        let missingVolumeCount = (self.missingVolumes as? Set<MissingVolume>)?.count ?? 1
         let otherTitlesOwnedVolumesTotal = otherTitlesArray.reduce(0) { total, otherTitle in
             total + Int(otherTitle.ownedVolumes)
         }

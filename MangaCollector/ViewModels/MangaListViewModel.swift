@@ -5,27 +5,42 @@ import CoreData
 
 class MangaListViewModel: ObservableObject {
     @Published var mangas: [Manga] = []
-    @Published var sortOption: SortOption = .titleAscending
+    @Published var sortOption: SortOption = .defaultOrder
     @Published var duplicateVolumeAlert = false
     private let databaseService: DatabaseService
 
     init(context: NSManagedObjectContext) {
         self.databaseService = DatabaseService(context: context)
         fetchMangas()
+        sortMangas()
     }
 
     // MARK: - Manga
     
     func fetchMangas() {
         databaseService.fetchMangas { [weak self] fetchedMangas in
-            self?.mangas = fetchedMangas ?? []
+            guard let self = self else { return }
+            if let mangas = fetchedMangas {
+                
+                // orderが未設定または0の場合に値を割り当てる
+                for (index, manga) in mangas.enumerated() {
+                    if manga.order == 0 {
+                        manga.order = Int16(index + 1)
+                    }
+                }
+                databaseService.saveContext()
+
+                self.mangas = mangas.sorted { $0.order < $1.order }
+            } else {
+                self.mangas = []
+            }
         }
     }
-    
+
     func sortMangas() {
         switch sortOption {
         case .defaultOrder:
-            break
+            mangas.sort { $0.order < $1.order }
         case .titleAscending:
             mangas.sort { $0.title ?? "" < $1.title ?? "" }
         case .titleDescending:
@@ -37,11 +52,17 @@ class MangaListViewModel: ObservableObject {
         }
     }
     
-    func addManga(title: String, authorName: String, publicationStatus: Int16, ownedVolumes: Int16, image: Data?) {
+    func updateOrder(for manga: Manga, newOrder: Int16) {
+        manga.order = newOrder
+        databaseService.saveContext() // Context の保存
+        fetchMangas()                 // 変更をリフレッシュ
+    }
+    
+    func addManga(title: String, publicationStatus: Int16, ownedVolumes: Int16, image: Data?) {
         // DatabaseServiceを使用して新しい漫画をデータベースに追加
         databaseService.addManga(
             title: title,
-            authorName: authorName,
+//            authorName: authorName,
             publicationStatus: publicationStatus,
             ownedVolumes: ownedVolumes,
             image: image
@@ -58,6 +79,16 @@ class MangaListViewModel: ObservableObject {
     func deleteManga(manga: Manga) {
         databaseService.deleteManga(manga)
         fetchMangas()
+        recalculateOrder() // 並び順を再計算
+        fetchMangas() // 再計算後の並び順を反映
+    }
+    
+    private func recalculateOrder() {
+        // 並び替え済みの mangas リストを使い、順序を更新
+        for (index, manga) in mangas.enumerated() {
+            manga.order = Int16(index + 1) // 1から始まる順序を割り当てる
+        }
+        databaseService.saveContext() // コンテキストを保存
     }
     
     // MARK: - Author

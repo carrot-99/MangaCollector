@@ -19,9 +19,11 @@ struct MangaRow: View {
                 Text(manga.title ?? "Unknown Title")
                     .font(.headline)
                     .lineLimit(1)
-                Text(authorsString(manga.authors))
-                    .font(.caption)
-                    .lineLimit(1)
+                if let authorNames = authorsString(manga.authors) { 
+                    Text(authorNames)
+                        .font(.caption)
+                        .lineLimit(1)
+                }
             }
             Spacer()
             Text("\(manga.calculatedOwnedVolumes)")
@@ -30,9 +32,9 @@ struct MangaRow: View {
         .shadow(radius: 10)
     }
     
-    private func authorsString(_ authors: NSSet?) -> String {
+    private func authorsString(_ authors: NSSet?) -> String? {
         guard let authorsSet = authors as? Set<Author>, !authorsSet.isEmpty else {
-            return "著者不明"
+            return nil
         }
         return authorsSet.map { $0.name ?? "不明" }.joined(separator: " / ")
     }

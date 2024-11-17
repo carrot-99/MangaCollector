@@ -69,9 +69,6 @@ struct MangaDetailView: View {
                 AuthorsListView(manga: manga, authors: Array(manga.authors as? Set<Author> ?? []), viewModel: viewModel, currentAlert: $currentAlert)
                     .frame(height: 100)
                 
-                // 画像
-                ImageView(image: $image, showingImagePicker: $showingImagePicker)
-                
                 // 連載状況、最新巻
                 HStack {
                     PublicationStatusView(publicationStatus: $publicationStatus)
@@ -88,6 +85,9 @@ struct MangaDetailView: View {
                 
                 // 外伝などリスト
                 OtherTitlesListView(manga: manga, viewModel: viewModel, newOtherTitleName: $newOtherTitleName, newOtherTitleOwnedVolumes: $newOtherTitleOwnedVolumes, newOtherTitleNotes: $newOtherTitleNotes, editingOtherTitle: $editingOtherTitle, editedOtherTitleName: $editedOtherTitleName, editedOtherTitleOwnedVolumes: $editedOtherTitleOwnedVolumes, editedOtherTitleNotes: $editedOtherTitleNotes)
+                
+                // 画像
+                ImageView(image: $image, showingImagePicker: $showingImagePicker)
                 
                 // メモ
                 MemoView(notes: $notes)

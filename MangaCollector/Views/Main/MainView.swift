@@ -46,7 +46,11 @@ struct MainView: View {
 
             switch displayMode {
             case .list:
-                MangaListView(filteredMangas: filteredMangas, viewModel: viewModel, deleteManga: deleteManga)
+                MangaListView(
+                    filteredMangas: filteredMangas,
+                    viewModel: viewModel,
+                    deleteManga: deleteManga
+                )
                     .padding(.bottom, 40)
             case .icons:
                 MangaIconsView(mangas: filteredMangas, viewModel: viewModel)
@@ -54,7 +58,12 @@ struct MainView: View {
             }
         }
         .navigationBarTitle("漫画リスト", displayMode: .inline)
-        .navigationBarItems(leading: addButton, trailing: toolbarMenu)
+        .navigationBarItems(leading: HStack {
+            addButton
+            if viewModel.sortOption == .defaultOrder && filterOption == .all {
+                EditButton()
+            }
+        }, trailing: toolbarMenu)
         .sheet(isPresented: $showingAddMangaDialog) {
             AddMangaDialog(isPresented: $showingAddMangaDialog, viewModel: viewModel)
         }
@@ -69,7 +78,7 @@ struct MainView: View {
     var toolbarMenu: some View {
         Menu {
             Button(showSearchBar ? "検索バーを隠す" : "検索バーを表示") {
-                showSearchBar.toggle() 
+                showSearchBar.toggle()
             }
             Divider()
             filterMenu
@@ -84,32 +93,66 @@ struct MainView: View {
 
     var filterMenu: some View {
         Group {
-            Button("全作品") { filterOption = .all }
-            Button("お気に入り") { filterOption = .favorites }
-            Button("連載中") { filterOption = .ongoing }
-            Button("完結済み") { filterOption = .completed }
-            Button("未完結") { filterOption = .incomplete }
+            Button("全作品") {
+                if filterOption != .all {
+                    filterOption = .all
+                }
+            }.disabled(filterOption == .all)
+            Button("お気に入り") {
+                if filterOption != .favorites {
+                    filterOption = .favorites
+                }
+            }.disabled(filterOption == .favorites)
+            Button("連載中") {
+                if filterOption != .ongoing {
+                    filterOption = .ongoing
+                }
+            }.disabled(filterOption == .ongoing)
+            Button("完結済み") {
+                if filterOption != .completed {
+                    filterOption = .completed
+                }
+            }.disabled(filterOption == .completed)
+            Button("未完結") {
+                if filterOption != .incomplete {
+                    filterOption = .incomplete
+                }
+            }.disabled(filterOption == .incomplete)
         }
     }
 
     var sortMenu: some View {
         Group {
+            Button("デフォルト順") {
+                if viewModel.sortOption != .defaultOrder {
+                    viewModel.sortOption = .defaultOrder
+                    viewModel.sortMangas()
+                }
+            }.disabled(viewModel.sortOption == .defaultOrder)
             Button("タイトル昇順") {
-                viewModel.sortOption = .titleAscending
-                viewModel.sortMangas()
-            }
+                if viewModel.sortOption != .titleAscending {
+                    viewModel.sortOption = .titleAscending
+                    viewModel.sortMangas()
+                }
+            }.disabled(viewModel.sortOption == .titleAscending)
             Button("タイトル降順") {
-                viewModel.sortOption = .titleDescending
-                viewModel.sortMangas()
-            }
+                if viewModel.sortOption != .titleDescending {
+                    viewModel.sortOption = .titleDescending
+                    viewModel.sortMangas()
+                }
+            }.disabled(viewModel.sortOption == .titleDescending)
             Button("巻数昇順") {
-                viewModel.sortOption = .volumeAscending
-                viewModel.sortMangas()
-            }
+                if viewModel.sortOption != .volumeAscending {
+                    viewModel.sortOption = .volumeAscending
+                    viewModel.sortMangas()
+                }
+            }.disabled(viewModel.sortOption == .volumeAscending)
             Button("巻数降順") {
-                viewModel.sortOption = .volumeDescending
-                viewModel.sortMangas()
-            }
+                if viewModel.sortOption != .volumeDescending {
+                    viewModel.sortOption = .volumeDescending
+                    viewModel.sortMangas()
+                }
+            }.disabled(viewModel.sortOption == .volumeDescending)
         }
     }
 
@@ -120,8 +163,7 @@ struct MainView: View {
     }
     
     private func deleteManga(at offsets: IndexSet) {
-        offsets.forEach { index in
-            let manga = viewModel.mangas[index]
+        offsets.map { filteredMangas[$0] }.forEach { manga in
             viewModel.deleteManga(manga: manga)
         }
     }

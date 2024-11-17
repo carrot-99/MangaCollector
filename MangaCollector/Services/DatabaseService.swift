@@ -10,7 +10,7 @@ class DatabaseService {
         self.context = context
     }
     
-    private func saveContext() {
+    func saveContext() {
         if context.hasChanges {
             do {
                 try context.save()
@@ -26,25 +26,56 @@ class DatabaseService {
         let request: NSFetchRequest<Manga> = Manga.fetchRequest()
 
         do {
-            let mangas = try context.fetch(request)
+            var mangas = try context.fetch(request)
+            
+            // orderが未設定または不整合の場合に修正
+            let needsRecalculation = mangas.contains { $0.order == 0 }
+            if needsRecalculation {
+                mangas.enumerated().forEach { index, manga in
+                    manga.order = Int16(index)
+                }
+                saveContext() // CoreDataに保存
+            }
+
+            // 並び替えして返す
+            mangas.sort { $0.order < $1.order }
             completion(mangas)
         } catch {
             print("Error fetching Manga: \(error.localizedDescription)")
             completion(nil)
         }
     }
+    
+    func fetchAllMangas() -> [Manga]? {
+        let request: NSFetchRequest<Manga> = Manga.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(key: "order", ascending: true)]
 
-    func addManga(title: String, authorName: String, publicationStatus: Int16, ownedVolumes: Int16, image: Data?) {
+        do {
+            return try context.fetch(request)
+        } catch {
+            print("Error fetching all Manga: \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    func addManga(title: String, publicationStatus: Int16, ownedVolumes: Int16, image: Data?) {
         let newManga = Manga(context: context)
         newManga.title = title
         newManga.ownedVolumes = ownedVolumes
+        newManga.totalOwnedVolumes = ownedVolumes
         newManga.publicationStatus = publicationStatus
+        newManga.publisher = "選択なし"
         newManga.image = image
         
-        // 著者情報の設定
-        let author = Author(context: context)
-        author.name = authorName
-        newManga.addToAuthors(author)
+        // orderを初期化する（既存のオブジェクト数 + 1）
+        let request: NSFetchRequest<Manga> = Manga.fetchRequest()
+        do {
+            let existingMangas = try context.fetch(request)
+            newManga.order = Int16(existingMangas.count)
+        } catch {
+            print("Error initializing order: \(error.localizedDescription)")
+            newManga.order = 0 // デフォルト値
+        }
         
         saveContext()  // CoreDataのコンテキストを保存
     }
@@ -76,6 +107,22 @@ class DatabaseService {
     func deleteManga(_ manga: Manga) {
         context.delete(manga)
         saveContext()
+        recalculateOrders()
+    }
+    
+    private func recalculateOrders() {
+        let request: NSFetchRequest<Manga> = Manga.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(key: "order", ascending: true)] // 確実に order 順で取得する
+
+        do {
+            let mangas = try context.fetch(request)
+            for (index, manga) in mangas.enumerated() {
+                manga.order = Int16(index + 1) // 1から始まる順序を付与
+            }
+            saveContext() // 更新後に保存
+        } catch {
+            print("Error recalculating orders: \(error.localizedDescription)")
+        }
     }
     
     // MARK: - Author
