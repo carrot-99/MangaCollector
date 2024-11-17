@@ -3,6 +3,15 @@
 import Foundation
 
 extension Manga {
+    var authorsArray: [String] {
+        get {
+            return (self.author as? [String]) ?? []
+        }
+        set {
+            self.author = newValue as NSObject
+        }
+    }
+    
     var missingVolumesArray: [MissingVolume] {
         let set = missingVolumes as? Set<MissingVolume> ?? []
         return set.sorted { $0.volumeNumber < $1.volumeNumber }

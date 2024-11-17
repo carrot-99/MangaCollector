@@ -63,11 +63,11 @@ struct MangaDetailView: View {
                     Spacer()
                     FavoriteView(isFavorite: $isFavorite)
                 }
-//                .padding(.bottom, 10)
                 
                 // 著者リスト
-                AuthorsListView(manga: manga, authors: Array(manga.authors as? Set<Author> ?? []), viewModel: viewModel, currentAlert: $currentAlert)
-                    .frame(height: 100)
+//                AuthorsListView(manga: manga, authors: Array(manga.authors as? Set<Author> ?? []), viewModel: viewModel, currentAlert: $currentAlert)
+//                .frame(height: 100)
+                AuthorsListView(manga: manga)
                 
                 // 連載状況、最新巻
                 HStack {
@@ -145,6 +145,7 @@ struct MangaDetailView: View {
         let updateSuccessful = viewModel.updateManga(
             manga,
             title: title,
+            authors: manga.authorsArray,
             ownedVolumes: Int16(ownedVolumes),
             publicationStatus: publicationStatus.rawValue,
             notes: notes,

@@ -5,6 +5,7 @@
         <relationship name="manga" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Manga" inverseName="authors" inverseEntity="Manga"/>
     </entity>
     <entity name="Manga" representedClassName="Manga" syncable="YES" codeGenerationType="class">
+        <attribute name="author" optional="YES" attributeType="Transformable"/>
         <attribute name="favorite" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="image" optional="YES" attributeType="Binary"/>
         <attribute name="notes" optional="YES" attributeType="String"/>

@@ -80,12 +80,13 @@ class DatabaseService {
         saveContext()  // CoreDataのコンテキストを保存
     }
 
-    func updateManga(_ manga: Manga, title: String, ownedVolumes: Int16, publicationStatus: Int16, notes: String, favorite: Bool, image: Data?, publisher: String, totalOwnedVolumes: Int16) -> Bool {
+    func updateManga(_ manga: Manga, title: String, authors: [String], ownedVolumes: Int16, publicationStatus: Int16, notes: String, favorite: Bool, image: Data?, publisher: String, totalOwnedVolumes: Int16) -> Bool {
         guard !title.isEmpty, ownedVolumes >= 0 else {
             return false
         }
 
         manga.title = title
+        manga.authorsArray = authors
         manga.ownedVolumes = ownedVolumes
         manga.publicationStatus = publicationStatus
         manga.notes = notes

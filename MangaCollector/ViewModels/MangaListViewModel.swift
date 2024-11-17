@@ -5,6 +5,7 @@ import CoreData
 
 class MangaListViewModel: ObservableObject {
     @Published var mangas: [Manga] = []
+    @Published var authors: [String] = []
     @Published var sortOption: SortOption = .defaultOrder
     @Published var duplicateVolumeAlert = false
     private let databaseService: DatabaseService
@@ -62,7 +63,6 @@ class MangaListViewModel: ObservableObject {
         // DatabaseServiceを使用して新しい漫画をデータベースに追加
         databaseService.addManga(
             title: title,
-//            authorName: authorName,
             publicationStatus: publicationStatus,
             ownedVolumes: ownedVolumes,
             image: image
@@ -70,8 +70,8 @@ class MangaListViewModel: ObservableObject {
         fetchMangas()  // データベースから漫画のリストを再取得して更新
     }
     
-    func updateManga(_ manga: Manga, title: String, ownedVolumes: Int16, publicationStatus: Int16, notes: String, favorite: Bool, image: Data?, publisher: String, totalOwnedVolumes: Int16) -> Bool {
-        let result = databaseService.updateManga(manga, title: title, ownedVolumes: ownedVolumes, publicationStatus: publicationStatus, notes: notes, favorite: favorite, image: image, publisher: publisher, totalOwnedVolumes: totalOwnedVolumes)
+    func updateManga(_ manga: Manga, title: String, authors: [String], ownedVolumes: Int16, publicationStatus: Int16, notes: String, favorite: Bool, image: Data?, publisher: String, totalOwnedVolumes: Int16) -> Bool {
+        let result = databaseService.updateManga(manga, title: title, authors: authors, ownedVolumes: ownedVolumes, publicationStatus: publicationStatus, notes: notes, favorite: favorite, image: image, publisher: publisher, totalOwnedVolumes: totalOwnedVolumes)
         fetchMangas()
         return result
     }

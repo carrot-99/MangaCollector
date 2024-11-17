@@ -3,13 +3,9 @@
 import SwiftUI
 
 struct AuthorsListView: View {
-    var manga: Manga
-    var authors: [Author]
-    @ObservedObject var viewModel: MangaListViewModel
-    @State private var showingAddAuthorDialog = false
-    @State private var showingEditAuthorDialog = false
-    @State private var selectedAuthor: Author?
-    @Binding var currentAlert: AlertType?
+    @ObservedObject var manga: Manga
+    @State private var newAuthorName: String = ""
+    @State private var isEditing: Bool = false
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -17,72 +13,68 @@ struct AuthorsListView: View {
                 Label("著者", systemImage: "person")
                     .font(.caption)
                     .foregroundColor(.gray)
-                
-                Button(action: {
-                    showingAddAuthorDialog = true
-                }) {
-                    Image(systemName: "plus")
+
+                Spacer()
+
+                Button(action: { isEditing.toggle() }) {
+                    Image(systemName: isEditing ? "checkmark" : "pencil")
                 }
             }
-            
-            ScrollView(.horizontal, showsIndicators: false) {
+
+            if isEditing {
+                // 著者名を追加
                 HStack {
-                    ForEach(authors, id: \.self) { author in
-                        HStack {
-                            Text(author.name ?? "")
-                            Button(action: {
-                                selectedAuthor = author
-                                showingEditAuthorDialog = true
-                            }) {
-                                Image(systemName: "pencil")
-                            }
-                        }
-                        .padding(10)
-                        .background(RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.blue, lineWidth: 2))
-                        
-                        if author != authors.last {
-                            Text(" / ")
+                    TextField("新しい著者名", text: $newAuthorName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    Button(action: addAuthor) {
+                        Image(systemName: "plus")
+                            .padding(5)
+                            .background(Circle().fill(Color.blue))
+                            .foregroundColor(.white)
+                    }
+                }
+
+                // 著者名を編集
+                ForEach(Array(manga.authorsArray.enumerated()), id: \.offset) { index, author in
+                    HStack {
+                        TextField("著者名を編集", text: Binding(
+                            get: { author },
+                            set: { manga.authorsArray[index] = $0 }
+                        ))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        Button(action: { deleteAuthor(at: index) }) {
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
                         }
                     }
                 }
+            } else {
+                // 通常表示
+                Text(manga.authorsArray.joined(separator: " / "))
+                    .font(.body)
+                    .lineLimit(1)
             }
-            .frame(minHeight: 50)
         }
         .padding()
-        .halfSheet(isPresented: $showingAddAuthorDialog) {
-            AddAuthorDialog(showingDialog: $showingAddAuthorDialog, currentAlert: $currentAlert) { name in
-                addAuthor(authorName: name)
-            }
+    }
+
+    private func addAuthor() {
+        guard !newAuthorName.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        manga.authorsArray.append(newAuthorName)
+        newAuthorName = ""
+        saveContext()
+    }
+
+    private func deleteAuthor(at index: Int) {
+        manga.authorsArray.remove(at: index)
+        saveContext()
+    }
+
+    private func saveContext() {
+        do {
+            try manga.managedObjectContext?.save()
+        } catch {
+            print("Error saving authors: \(error.localizedDescription)")
         }
-        .halfSheet(isPresented: $showingEditAuthorDialog) {
-            if let selectedAuthor = selectedAuthor {
-                EditAuthorDialog(
-                    showingDialog: $showingEditAuthorDialog,
-                    author: .constant(selectedAuthor), currentAlert: $currentAlert,
-                    onEdit: { author, newName in
-                        updateAuthor(author: author, newName: newName)
-                    },
-                    onDelete: { author in
-                        deleteAuthor(author: author)
-                    }
-                )
-            }
-        }
-    }
-    
-    private func addAuthor(authorName: String) {
-        viewModel.addAuthor(to: manga, name: authorName)
-        showingAddAuthorDialog = false
-    }
-    
-    private func updateAuthor(author: Author, newName: String) {
-        viewModel.updateAuthor(author: author, newName: newName)
-        showingAddAuthorDialog = false
-    }
-    
-    private func deleteAuthor(author: Author) {
-        viewModel.deleteAuthor(author: author)
-        showingAddAuthorDialog = false
     }
 }

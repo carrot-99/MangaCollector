@@ -19,15 +19,24 @@ struct MangaRow: View {
                 Text(manga.title ?? "Unknown Title")
                     .font(.headline)
                     .lineLimit(1)
-                if let authorNames = authorsString(manga.authors) { 
-                    Text(authorNames)
-                        .font(.caption)
+//                if let authorNames = authorsString(manga.authors) { 
+//                    Text(authorNames)
+//                        .font(.caption)
+//                        .lineLimit(1)
+//                }
+                if !manga.authorsArray.isEmpty {
+                    Text(manga.authorsArray.joined(separator: " / "))
+                        .font(.body)
                         .lineLimit(1)
                 }
             }
             Spacer()
-            Text("\(manga.calculatedOwnedVolumes)")
-                .font(.subheadline)
+            VStack{
+                Text("総計：\(manga.calculatedOwnedVolumes)")
+                    .font(.headline)
+                Text("最新：\(manga.ownedVolumes)")
+                    .font(.subheadline)
+            }
         }
         .shadow(radius: 10)
     }
