@@ -43,6 +43,16 @@
 		CE90C8402B5FA985005D9184 /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE90C83F2B5FA985005D9184 /* PrivacyPolicyView.swift */; };
 		CE90C8422B5FAAB2005D9184 /* TermsAndPrivacyAgreementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE90C8412B5FAAB2005D9184 /* TermsAndPrivacyAgreementView.swift */; };
 		CE93E5D22BBE6FB60070D84E /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE93E5D12BBE6FB60070D84E /* SearchBar.swift */; };
+		CEAF5A1B2CF4B8AC00C8B9BB /* CoreDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF5A1A2CF4B89800C8B9BB /* CoreDataService.swift */; };
+		CEAF5A1D2CF4B8F000C8B9BB /* MangaService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF5A1C2CF4B8E100C8B9BB /* MangaService.swift */; };
+		CEAF5A1F2CF4B92D00C8B9BB /* AuthorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF5A1E2CF4B92500C8B9BB /* AuthorService.swift */; };
+		CEAF5A212CF4B94900C8B9BB /* MissingVolumeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF5A202CF4B93F00C8B9BB /* MissingVolumeService.swift */; };
+		CEAF5A232CF4B96200C8B9BB /* OtherTitleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF5A222CF4B95800C8B9BB /* OtherTitleService.swift */; };
+		CEAF5A252CF4BCFB00C8B9BB /* MangaViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF5A242CF4BCEC00C8B9BB /* MangaViewModel.swift */; };
+		CEAF5A272CF4BD1800C8B9BB /* AuthorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF5A262CF4BD0D00C8B9BB /* AuthorViewModel.swift */; };
+		CEAF5A292CF4BD2E00C8B9BB /* MissingVolumeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF5A282CF4BD2C00C8B9BB /* MissingVolumeViewModel.swift */; };
+		CEAF5A2B2CF4BD4700C8B9BB /* OtherTitleViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF5A2A2CF4BD4400C8B9BB /* OtherTitleViewModel.swift */; };
+		CEAF5A2D2CF4C02800C8B9BB /* GraphViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF5A2C2CF4C02200C8B9BB /* GraphViewModel.swift */; };
 		CEAF61752B4D7A81001EA0DE /* MangaCollectorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF61742B4D7A81001EA0DE /* MangaCollectorApp.swift */; };
 		CEAF61772B4D7A81001EA0DE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF61762B4D7A81001EA0DE /* ContentView.swift */; };
 		CEAF61792B4D7A82001EA0DE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CEAF61782B4D7A82001EA0DE /* Assets.xcassets */; };
@@ -109,6 +119,16 @@
 		CE93E5D12BBE6FB60070D84E /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		CEAF5A092CE8E31700C8B9BB /* MangaCollector 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "MangaCollector 3.xcdatamodel"; sourceTree = "<group>"; };
 		CEAF5A0E2CE995C100C8B9BB /* MangaCollectorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MangaCollectorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEAF5A1A2CF4B89800C8B9BB /* CoreDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataService.swift; sourceTree = "<group>"; };
+		CEAF5A1C2CF4B8E100C8B9BB /* MangaService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangaService.swift; sourceTree = "<group>"; };
+		CEAF5A1E2CF4B92500C8B9BB /* AuthorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorService.swift; sourceTree = "<group>"; };
+		CEAF5A202CF4B93F00C8B9BB /* MissingVolumeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissingVolumeService.swift; sourceTree = "<group>"; };
+		CEAF5A222CF4B95800C8B9BB /* OtherTitleService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherTitleService.swift; sourceTree = "<group>"; };
+		CEAF5A242CF4BCEC00C8B9BB /* MangaViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangaViewModel.swift; sourceTree = "<group>"; };
+		CEAF5A262CF4BD0D00C8B9BB /* AuthorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorViewModel.swift; sourceTree = "<group>"; };
+		CEAF5A282CF4BD2C00C8B9BB /* MissingVolumeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissingVolumeViewModel.swift; sourceTree = "<group>"; };
+		CEAF5A2A2CF4BD4400C8B9BB /* OtherTitleViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherTitleViewModel.swift; sourceTree = "<group>"; };
+		CEAF5A2C2CF4C02200C8B9BB /* GraphViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphViewModel.swift; sourceTree = "<group>"; };
 		CEAF61712B4D7A81001EA0DE /* MangaCollector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MangaCollector.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEAF61742B4D7A81001EA0DE /* MangaCollectorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangaCollectorApp.swift; sourceTree = "<group>"; };
 		CEAF61762B4D7A81001EA0DE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -304,6 +324,11 @@
 		CEAF618A2B4E264B001EA0DE /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				CEAF5A2C2CF4C02200C8B9BB /* GraphViewModel.swift */,
+				CEAF5A2A2CF4BD4400C8B9BB /* OtherTitleViewModel.swift */,
+				CEAF5A282CF4BD2C00C8B9BB /* MissingVolumeViewModel.swift */,
+				CEAF5A262CF4BD0D00C8B9BB /* AuthorViewModel.swift */,
+				CEAF5A242CF4BCEC00C8B9BB /* MangaViewModel.swift */,
 				CEAF618B2B4E277D001EA0DE /* MangaListViewModel.swift */,
 			);
 			path = ViewModels;
@@ -333,6 +358,11 @@
 		CEAF61912B4E2946001EA0DE /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				CEAF5A222CF4B95800C8B9BB /* OtherTitleService.swift */,
+				CEAF5A202CF4B93F00C8B9BB /* MissingVolumeService.swift */,
+				CEAF5A1E2CF4B92500C8B9BB /* AuthorService.swift */,
+				CEAF5A1C2CF4B8E100C8B9BB /* MangaService.swift */,
+				CEAF5A1A2CF4B89800C8B9BB /* CoreDataService.swift */,
 				CEAF61922B4E295A001EA0DE /* DatabaseService.swift */,
 			);
 			path = Services;
@@ -535,7 +565,9 @@
 				CE763FBA2B50207900C14132 /* AddOtherTitleDialog.swift in Sources */,
 				CE90C8362B59154B005D9184 /* MainView.swift in Sources */,
 				CE763FC62B52189D00C14132 /* HalfSheetViewModifier.swift in Sources */,
+				CEAF5A272CF4BD1800C8B9BB /* AuthorViewModel.swift in Sources */,
 				CE90C8262B57B872005D9184 /* OtherTitlesListView.swift in Sources */,
+				CEAF5A2D2CF4C02800C8B9BB /* GraphViewModel.swift in Sources */,
 				CE90C8382B5A4401005D9184 /* PublicationStatusGraphView.swift in Sources */,
 				CE763FA92B4FBA6D00C14132 /* MissingVolume.swift in Sources */,
 				CE90C8142B5691D9005D9184 /* ImagePicker.swift in Sources */,
@@ -544,17 +576,21 @@
 				CE763FB22B501FAF00C14132 /* PublicationStatusView.swift in Sources */,
 				CEAF61902B4E27CD001EA0DE /* MangaRow.swift in Sources */,
 				CE763FB62B50204F00C14132 /* AddMissingVolumeDialog.swift in Sources */,
+				CEAF5A1D2CF4B8F000C8B9BB /* MangaService.swift in Sources */,
 				CE90C8282B57D52B005D9184 /* AuthorsListView.swift in Sources */,
 				CE763FAE2B4FD4C100C14132 /* AdMobBannerView.swift in Sources */,
+				CEAF5A2B2CF4BD4700C8B9BB /* OtherTitleViewModel.swift in Sources */,
 				CE763FBC2B50215600C14132 /* EditOtherTitleDialog.swift in Sources */,
 				CEAF61932B4E295A001EA0DE /* DatabaseService.swift in Sources */,
 				CE90C8422B5FAAB2005D9184 /* TermsAndPrivacyAgreementView.swift in Sources */,
+				CEAF5A1F2CF4B92D00C8B9BB /* AuthorService.swift in Sources */,
 				CE763FAB2B4FBAC000C14132 /* OtherTitle.swift in Sources */,
 				CE90C8302B58EC57005D9184 /* NavigationBarItemsView.swift in Sources */,
 				CE90C8342B5914FE005D9184 /* MangaIconsView.swift in Sources */,
 				CE90C8242B57B4FE005D9184 /* MissingVolumesListView.swift in Sources */,
 				CE763FA72B4FA0F800C14132 /* ListSectionView.swift in Sources */,
 				CEAF61772B4D7A81001EA0DE /* ContentView.swift in Sources */,
+				CEAF5A212CF4B94900C8B9BB /* MissingVolumeService.swift in Sources */,
 				CE763FB82B50206600C14132 /* EditMissingVolumeDialog.swift in Sources */,
 				CE90C81C2B57AA3D005D9184 /* MemoView.swift in Sources */,
 				CE763FC02B5108DD00C14132 /* SettingsView.swift in Sources */,
@@ -564,18 +600,22 @@
 				CEAF61952B4E3044001EA0DE /* AddMangaDialog.swift in Sources */,
 				CE90C8182B57A9C1005D9184 /* ImageView.swift in Sources */,
 				CEAF61752B4D7A81001EA0DE /* MangaCollectorApp.swift in Sources */,
+				CEAF5A252CF4BCFB00C8B9BB /* MangaViewModel.swift in Sources */,
 				CE93E5D22BBE6FB60070D84E /* SearchBar.swift in Sources */,
 				CE763FB02B501F8500C14132 /* TitleView.swift in Sources */,
 				CE90C8052B55F1F1005D9184 /* GraphView.swift in Sources */,
 				CE90C81A2B57A9FE005D9184 /* PublisherView.swift in Sources */,
 				CE90C83E2B5FA945005D9184 /* TermsView.swift in Sources */,
 				CE90C83A2B5A4487005D9184 /* PublisherGraphView.swift in Sources */,
+				CEAF5A232CF4B96200C8B9BB /* OtherTitleService.swift in Sources */,
+				CEAF5A292CF4BD2E00C8B9BB /* MissingVolumeViewModel.swift in Sources */,
 				CE90C82A2B57D55C005D9184 /* AddAuthorDialog.swift in Sources */,
 				CE90C8402B5FA985005D9184 /* PrivacyPolicyView.swift in Sources */,
 				CEAF61892B4E25B2001EA0DE /* MangaListView.swift in Sources */,
 				CEAF61992B4E3E2D001EA0DE /* MangaDetailView.swift in Sources */,
 				CEAF61C12B4E887C001EA0DE /* Manga.swift in Sources */,
 				CEAF618C2B4E277D001EA0DE /* MangaListViewModel.swift in Sources */,
+				CEAF5A1B2CF4B8AC00C8B9BB /* CoreDataService.swift in Sources */,
 				CE763FB42B501FE200C14132 /* OwnedVolumesView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

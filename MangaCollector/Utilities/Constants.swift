@@ -20,9 +20,7 @@ enum PublicationStatus: Int16, CaseIterable, Identifiable {
             return "未完結"
         }
     }
-}
 
-extension PublicationStatus {
     var color: Color {
         switch self {
         case .ongoing:

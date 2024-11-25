@@ -164,7 +164,7 @@ struct MainView: View {
     
     private func deleteManga(at offsets: IndexSet) {
         offsets.map { filteredMangas[$0] }.forEach { manga in
-            viewModel.deleteManga(manga: manga)
+            viewModel.deleteManga(manga)
         }
     }
     

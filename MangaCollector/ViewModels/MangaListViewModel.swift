@@ -5,171 +5,119 @@ import CoreData
 
 class MangaListViewModel: ObservableObject {
     @Published var mangas: [Manga] = []
-    @Published var authors: [String] = []
     @Published var sortOption: SortOption = .defaultOrder
     @Published var duplicateVolumeAlert = false
-    private let databaseService: DatabaseService
+
+    private let mangaViewModel: MangaViewModel
+    private let authorViewModel: AuthorViewModel
+    private let missingVolumeViewModel: MissingVolumeViewModel
+    private let otherTitleViewModel: OtherTitleViewModel
+    private let graphViewModel: GraphViewModel
 
     init(context: NSManagedObjectContext) {
-        self.databaseService = DatabaseService(context: context)
+        let databaseService = DatabaseService(context: context)
+        self.mangaViewModel = MangaViewModel(databaseService: databaseService)
+        self.authorViewModel = AuthorViewModel(databaseService: databaseService)
+        self.missingVolumeViewModel = MissingVolumeViewModel(databaseService: databaseService)
+        self.otherTitleViewModel = OtherTitleViewModel(databaseService: databaseService)
+        self.graphViewModel = GraphViewModel(databaseService: databaseService)
+
         fetchMangas()
         sortMangas()
     }
 
-    // MARK: - Manga
-    
+    // Manga関連処理の委譲
     func fetchMangas() {
-        databaseService.fetchMangas { [weak self] fetchedMangas in
-            guard let self = self else { return }
-            if let mangas = fetchedMangas {
-                
-                // orderが未設定または0の場合に値を割り当てる
-                for (index, manga) in mangas.enumerated() {
-                    if manga.order == 0 {
-                        manga.order = Int16(index + 1)
-                    }
-                }
-                databaseService.saveContext()
-
-                self.mangas = mangas.sorted { $0.order < $1.order }
-            } else {
-                self.mangas = []
-            }
-        }
+        mangas = mangaViewModel.fetchMangas()
     }
 
     func sortMangas() {
-        switch sortOption {
-        case .defaultOrder:
-            mangas.sort { $0.order < $1.order }
-        case .titleAscending:
-            mangas.sort { $0.title ?? "" < $1.title ?? "" }
-        case .titleDescending:
-            mangas.sort { $0.title ?? "" > $1.title ?? "" }
-        case .volumeAscending:
-            mangas.sort { $0.totalOwnedVolumes < $1.totalOwnedVolumes }
-        case .volumeDescending:
-            mangas.sort { $0.totalOwnedVolumes > $1.totalOwnedVolumes }
-        }
+        mangas = mangaViewModel.sortMangas(mangas: mangas, by: sortOption)
     }
-    
-    func updateOrder(for manga: Manga, newOrder: Int16) {
-        manga.order = newOrder
-        databaseService.saveContext() // Context の保存
-        fetchMangas()                 // 変更をリフレッシュ
-    }
-    
+
     func addManga(title: String, publicationStatus: Int16, ownedVolumes: Int16, image: Data?) {
-        // DatabaseServiceを使用して新しい漫画をデータベースに追加
-        databaseService.addManga(
-            title: title,
-            publicationStatus: publicationStatus,
-            ownedVolumes: ownedVolumes,
-            image: image
-        )
-        fetchMangas()  // データベースから漫画のリストを再取得して更新
+        mangaViewModel.addManga(title: title, publicationStatus: publicationStatus, ownedVolumes: ownedVolumes, image: image)
+        fetchMangas()
     }
-    
+
     func updateManga(_ manga: Manga, title: String, authors: [String], ownedVolumes: Int16, publicationStatus: Int16, notes: String, favorite: Bool, image: Data?, publisher: String, totalOwnedVolumes: Int16) -> Bool {
-        let result = databaseService.updateManga(manga, title: title, authors: authors, ownedVolumes: ownedVolumes, publicationStatus: publicationStatus, notes: notes, favorite: favorite, image: image, publisher: publisher, totalOwnedVolumes: totalOwnedVolumes)
+        let result = mangaViewModel.updateManga(manga, title: title, authors: authors, ownedVolumes: ownedVolumes, publicationStatus: publicationStatus, notes: notes, favorite: favorite, image: image, publisher: publisher, totalOwnedVolumes: totalOwnedVolumes)
         fetchMangas()
         return result
     }
-    
-    func deleteManga(manga: Manga) {
-        databaseService.deleteManga(manga)
+
+    func deleteManga(_ manga: Manga) {
+        mangaViewModel.deleteManga(manga)
         fetchMangas()
-        recalculateOrder() // 並び順を再計算
-        fetchMangas() // 再計算後の並び順を反映
     }
-    
-    private func recalculateOrder() {
-        // 並び替え済みの mangas リストを使い、順序を更新
-        for (index, manga) in mangas.enumerated() {
-            manga.order = Int16(index + 1) // 1から始まる順序を割り当てる
-        }
-        databaseService.saveContext() // コンテキストを保存
+
+    func updateOrder(for manga: Manga, newOrder: Int16) {
+        mangaViewModel.updateOrder(for: manga, newOrder: newOrder)
+        fetchMangas()
     }
-    
-    // MARK: - Author
-    
+
+    // Author関連処理の委譲
     func addAuthor(to manga: Manga, name: String) {
-        databaseService.addAuthor(to: manga, name: name)
+        authorViewModel.addAuthor(to: manga, name: name)
         fetchMangas()
     }
-    
+
     func updateAuthor(author: Author, newName: String) {
-        databaseService.updateAuthor(author, newName: newName)
+        authorViewModel.updateAuthor(author, newName: newName)
         fetchMangas()
     }
-    
+
     func deleteAuthor(author: Author) {
-        databaseService.deleteAuthor(author)
+        authorViewModel.deleteAuthor(author)
         fetchMangas()
     }
-    
-    // MARK: - MissingVolume
-    
+
+    // MissingVolume関連処理の委譲
     func addMissingVolume(to manga: Manga, volumeNumber: Int16) -> Bool {
-        if databaseService.addMissingVolume(to: manga, volumeNumber: volumeNumber) {
-            fetchMangas()
-            return true
-        } else {
+        let success = missingVolumeViewModel.addMissingVolume(to: manga, volumeNumber: volumeNumber)
+        if !success {
             duplicateVolumeAlert = true
-            return false
         }
+        fetchMangas()
+        return success
     }
-    
+
     func updateMissingVolume(manga: Manga, volume: MissingVolume, newVolumeNumber: Int16) -> Bool {
-        if databaseService.updateMissingVolume(manga: manga, volume: volume, newVolumeNumber: newVolumeNumber) {
-            fetchMangas()
-            return true
-        } else {
+        let success = missingVolumeViewModel.updateMissingVolume(manga: manga, volume: volume, newVolumeNumber: newVolumeNumber)
+        if !success {
             duplicateVolumeAlert = true
-            return false
         }
+        fetchMangas()
+        return success
     }
-    
+
     func deleteMissingVolume(manga: Manga, volume: MissingVolume) {
-        databaseService.deleteMissingVolume(manga: manga, volume: volume)
+        missingVolumeViewModel.deleteMissingVolume(manga: manga, volume: volume)
         fetchMangas()
     }
-    
-    // MARK: - OtherTitle
-    
+
+    // OtherTitle関連処理の委譲
     func addOtherTitle(to manga: Manga, title: String, ownedVolumes: Int16, notes: String) {
-        databaseService.addOtherTitle(to: manga, title: title, ownedVolumes: ownedVolumes, notes: notes)
-        fetchMangas() 
+        otherTitleViewModel.addOtherTitle(to: manga, title: title, ownedVolumes: ownedVolumes, notes: notes)
+        fetchMangas()
     }
-    
+
     func updateOtherTitle(manga: Manga, otherTitle: OtherTitle, newTitle: String, newOwnedVolumes: Int16, newNotes: String) {
-        databaseService.updateOtherTitle(otherTitle: otherTitle, newTitle: newTitle, newOwnedVolumes: newOwnedVolumes, newNotes: newNotes)
+        otherTitleViewModel.updateOtherTitle(manga: manga, otherTitle: otherTitle, newTitle: newTitle, newOwnedVolumes: newOwnedVolumes, newNotes: newNotes)
         fetchMangas()
     }
-    
+
     func deleteOtherTitle(manga: Manga, otherTitle: OtherTitle) {
-        databaseService.deleteOtherTitle(otherTitle: otherTitle)
+        otherTitleViewModel.deleteOtherTitle(manga: manga, otherTitle: otherTitle)
         fetchMangas()
     }
-    
-    // MARK: -
-    
+
+    // Graph関連処理の委譲
     func countTitlesByStatus() -> [PublicationStatus: Int] {
-        var countDict: [PublicationStatus: Int] = [:]
-        for status in PublicationStatus.allCases {
-            let count = mangas.filter { $0.publicationStatus == status.rawValue }.count
-            countDict[status] = count
-        }
-        return countDict
+        return graphViewModel.countTitlesByStatus(mangas: mangas)
     }
 
     func countVolumesByStatus() -> [PublicationStatus: Int] {
-        var countDict: [PublicationStatus: Int] = [:]
-        for status in PublicationStatus.allCases {
-            let totalVolumes = mangas.filter { $0.publicationStatus == status.rawValue }
-                                     .reduce(0) { $0 + Int($1.totalOwnedVolumes) }
-            countDict[status] = totalVolumes
-        }
-        return countDict
+        return graphViewModel.countVolumesByStatus(mangas: mangas)
     }
 }
