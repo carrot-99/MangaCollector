@@ -19,14 +19,9 @@ struct MangaRow: View {
                 Text(manga.title ?? "Unknown Title")
                     .font(.headline)
                     .lineLimit(1)
-//                if let authorNames = authorsString(manga.authors) { 
-//                    Text(authorNames)
-//                        .font(.caption)
-//                        .lineLimit(1)
-//                }
                 if !manga.authorsArray.isEmpty {
                     Text(manga.authorsArray.joined(separator: " / "))
-                        .font(.body)
+                        .font(.caption)
                         .lineLimit(1)
                 }
             }
