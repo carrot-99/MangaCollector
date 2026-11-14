@@ -4,71 +4,78 @@ import SwiftUI
 
 struct MangaIconsView: View {
     var mangas: [Manga]
-    var viewModel: MangaListViewModel
+    @ObservedObject var viewModel: MangaListViewModel
 
     private var columns: [GridItem] {
         let numberOfColumns = UIDevice.current.userInterfaceIdiom == .pad ? 6 : 3
-        return Array(repeating: GridItem(.flexible()), count: numberOfColumns)
+        return Array(repeating: GridItem(.flexible(), spacing: 12), count: numberOfColumns)
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: 20) {
-                    ForEach(mangas, id: \.self) { manga in
-                        NavigationLink(destination: MangaDetailView(manga: manga, viewModel: viewModel)) {
-                            VStack {
-                                ZStack(alignment: .topTrailing) {
-                                    MangaImage(manga: manga)
-                                        .frame(width: geometry.size.width / CGFloat(columns.count) - 50, height: 100)
-                                        .shadow(radius: 5)
-
-                                    if manga.totalOwnedVolumes > 0 {
-                                        Text("\(manga.totalOwnedVolumes)")
-                                            .font(.caption)
-                                            .foregroundColor(.white)
-                                            .padding(6)
-                                            .background(Color.blue)
-                                            .clipShape(Circle())
-                                            .offset(x: 10, y: -10)
-                                    }
-                                }
-
-                                Text(manga.title ?? "Unknown Title")
-                                    .font(.caption)
-                                    .lineLimit(1)
-                                Text(authorsString(manga.authors))
-                                    .font(.caption2)
-                                    .lineLimit(1)
-                            }
-                            .padding()
-                            .background(RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.blue, lineWidth: 2))
-                        }
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 16) {
+                ForEach(mangas, id: \.objectID) { manga in
+                    NavigationLink(destination: MangaDetailView(manga: manga, viewModel: viewModel)) {
+                        MangaIconCell(manga: manga)
                     }
+                    .buttonStyle(.plain)
                 }
-                .padding()
             }
+            .padding()
         }
     }
+}
 
-    private func authorsString(_ authors: NSSet?) -> String {
-        guard let authorsSet = authors as? Set<Author>, !authorsSet.isEmpty else {
-            return ""
+private struct MangaIconCell: View {
+    @ObservedObject var manga: Manga
+
+    var body: some View {
+        VStack(spacing: 4) {
+            ZStack(alignment: .topTrailing) {
+                cover
+                    .frame(height: 120)
+                    .frame(maxWidth: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                    .shadow(radius: 3)
+
+                if manga.totalOwnedVolumes > 0 {
+                    Text("\(manga.totalOwnedVolumes)")
+                        .font(.caption2.bold())
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(Capsule().fill(Color.blue))
+                        .offset(x: 4, y: -6)
+                }
+            }
+
+            Text(manga.displayTitle)
+                .font(.caption)
+                .lineLimit(1)
+            Text(manga.authorsText)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .lineLimit(1)
         }
-        return authorsSet.map { $0.name ?? "" }.joined(separator: " / ")
+        .padding(8)
+        .background(RoundedRectangle(cornerRadius: 10)
+            .stroke(Color.blue, lineWidth: 2))
+        .contentShape(Rectangle())
     }
 
     @ViewBuilder
-    private func MangaImage(manga: Manga) -> some View {
+    private var cover: some View {
         if let imageData = manga.image, let image = UIImage(data: imageData) {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFit()
         } else {
-            Image(systemName: "photo")
-                .resizable()
-                .scaledToFit()
+            ZStack {
+                Color.secondary.opacity(0.15)
+                Image(systemName: "book.closed")
+                    .font(.largeTitle)
+                    .foregroundColor(.secondary)
+            }
         }
     }
 }

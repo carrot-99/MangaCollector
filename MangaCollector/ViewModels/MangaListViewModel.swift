@@ -3,121 +3,120 @@
 import Foundation
 import CoreData
 
-class MangaListViewModel: ObservableObject {
-    @Published var mangas: [Manga] = []
-    @Published var sortOption: SortOption = .defaultOrder
-    @Published var duplicateVolumeAlert = false
+final class MangaListViewModel: ObservableObject {
+    /// order 順の全作品
+    @Published private(set) var mangas: [Manga] = []
+    @Published var sortOption: SortOption {
+        didSet { UserDefaults.standard.set(sortOption.rawValue, forKey: UserDefaultsKey.sortOption) }
+    }
+    @Published var filterOption: FilterOption = .all
+    @Published var searchText = ""
 
-    private let mangaViewModel: MangaViewModel
-    private let authorViewModel: AuthorViewModel
-    private let missingVolumeViewModel: MissingVolumeViewModel
-    private let otherTitleViewModel: OtherTitleViewModel
-    private let graphViewModel: GraphViewModel
+    private let service: MangaService
 
     init(context: NSManagedObjectContext) {
-        let databaseService = DatabaseService(context: context)
-        self.mangaViewModel = MangaViewModel(databaseService: databaseService)
-        self.authorViewModel = AuthorViewModel(databaseService: databaseService)
-        self.missingVolumeViewModel = MissingVolumeViewModel(databaseService: databaseService)
-        self.otherTitleViewModel = OtherTitleViewModel(databaseService: databaseService)
-        self.graphViewModel = GraphViewModel(databaseService: databaseService)
-
+        self.service = MangaService(context: context)
+        let savedSort = UserDefaults.standard.string(forKey: UserDefaultsKey.sortOption)
+        self.sortOption = savedSort.flatMap(SortOption.init(rawValue:)) ?? .defaultOrder
         fetchMangas()
-        sortMangas()
     }
 
-    // Manga関連処理の委譲
+    // MARK: - 表示用
+
+    /// 検索・フィルタ・並び替えを適用した作品一覧
+    var displayedMangas: [Manga] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let filtered = mangas.filter { manga in
+            guard filterOption.matches(manga) else { return false }
+            guard !query.isEmpty else { return true }
+            return manga.displayTitle.localizedCaseInsensitiveContains(query)
+                || manga.authorsArray.contains { $0.localizedCaseInsensitiveContains(query) }
+        }
+        return sorted(filtered)
+    }
+
+    /// 手動並べ替えが可能な状態か
+    var canReorder: Bool {
+        sortOption == .defaultOrder && filterOption == .all && searchText.isEmpty
+    }
+
+    var isFiltering: Bool {
+        filterOption != .all || !searchText.isEmpty
+    }
+
+    private func sorted(_ list: [Manga]) -> [Manga] {
+        switch sortOption {
+        case .defaultOrder:
+            return list
+        case .titleAscending:
+            return list.sorted { $0.displayTitle.localizedStandardCompare($1.displayTitle) == .orderedAscending }
+        case .titleDescending:
+            return list.sorted { $0.displayTitle.localizedStandardCompare($1.displayTitle) == .orderedDescending }
+        case .volumeAscending:
+            return list.sorted { $0.totalOwnedVolumes < $1.totalOwnedVolumes }
+        case .volumeDescending:
+            return list.sorted { $0.totalOwnedVolumes > $1.totalOwnedVolumes }
+        }
+    }
+
+    // MARK: - Manga
+
     func fetchMangas() {
-        mangas = mangaViewModel.fetchMangas()
+        mangas = service.fetchMangas()
     }
 
-    func sortMangas() {
-        mangas = mangaViewModel.sortMangas(mangas: mangas, by: sortOption)
-    }
-
-    func addManga(title: String, publicationStatus: Int16, ownedVolumes: Int16, image: Data?) {
-        mangaViewModel.addManga(title: title, publicationStatus: publicationStatus, ownedVolumes: ownedVolumes, image: image)
+    func addManga(title: String, publicationStatus: PublicationStatus, ownedVolumes: Int16, image: Data?) {
+        service.addManga(title: title, publicationStatus: publicationStatus, ownedVolumes: ownedVolumes, image: image)
         fetchMangas()
     }
 
-    func updateManga(_ manga: Manga, title: String, authors: [String], ownedVolumes: Int16, publicationStatus: Int16, notes: String, favorite: Bool, image: Data?, publisher: String, totalOwnedVolumes: Int16) -> Bool {
-        let result = mangaViewModel.updateManga(manga, title: title, authors: authors, ownedVolumes: ownedVolumes, publicationStatus: publicationStatus, notes: notes, favorite: favorite, image: image, publisher: publisher, totalOwnedVolumes: totalOwnedVolumes)
+    func updateManga(_ manga: Manga, with draft: MangaDraft) -> Bool {
+        let result = service.updateManga(manga, with: draft)
         fetchMangas()
         return result
     }
 
-    func deleteManga(_ manga: Manga) {
-        mangaViewModel.deleteManga(manga)
+    func incrementOwnedVolumes(of manga: Manga) {
+        service.incrementOwnedVolumes(of: manga)
         fetchMangas()
     }
 
-    func updateOrder(for manga: Manga, newOrder: Int16) {
-        mangaViewModel.updateOrder(for: manga, newOrder: newOrder)
+    func deleteMangas(_ targets: [Manga]) {
+        targets.forEach(service.deleteManga)
         fetchMangas()
     }
 
-    // Author関連処理の委譲
-    func addAuthor(to manga: Manga, name: String) {
-        authorViewModel.addAuthor(to: manga, name: name)
+    func moveMangas(from source: IndexSet, to destination: Int) {
+        var reordered = mangas
+        reordered.move(fromOffsets: source, toOffset: destination)
+        service.reorder(reordered)
         fetchMangas()
     }
 
-    func updateAuthor(author: Author, newName: String) {
-        authorViewModel.updateAuthor(author, newName: newName)
-        fetchMangas()
-    }
+    // MARK: - OtherTitle
 
-    func deleteAuthor(author: Author) {
-        authorViewModel.deleteAuthor(author)
-        fetchMangas()
-    }
-
-    // MissingVolume関連処理の委譲
-    func addMissingVolume(to manga: Manga, volumeNumber: Int16) -> Bool {
-        let success = missingVolumeViewModel.addMissingVolume(to: manga, volumeNumber: volumeNumber)
-        if !success {
-            duplicateVolumeAlert = true
-        }
-        fetchMangas()
-        return success
-    }
-
-    func updateMissingVolume(manga: Manga, volume: MissingVolume, newVolumeNumber: Int16) -> Bool {
-        let success = missingVolumeViewModel.updateMissingVolume(manga: manga, volume: volume, newVolumeNumber: newVolumeNumber)
-        if !success {
-            duplicateVolumeAlert = true
-        }
-        fetchMangas()
-        return success
-    }
-
-    func deleteMissingVolume(manga: Manga, volume: MissingVolume) {
-        missingVolumeViewModel.deleteMissingVolume(manga: manga, volume: volume)
-        fetchMangas()
-    }
-
-    // OtherTitle関連処理の委譲
     func addOtherTitle(to manga: Manga, title: String, ownedVolumes: Int16, notes: String) {
-        otherTitleViewModel.addOtherTitle(to: manga, title: title, ownedVolumes: ownedVolumes, notes: notes)
+        service.addOtherTitle(to: manga, title: title, ownedVolumes: ownedVolumes, notes: notes)
         fetchMangas()
     }
 
-    func updateOtherTitle(manga: Manga, otherTitle: OtherTitle, newTitle: String, newOwnedVolumes: Int16, newNotes: String) {
-        otherTitleViewModel.updateOtherTitle(manga: manga, otherTitle: otherTitle, newTitle: newTitle, newOwnedVolumes: newOwnedVolumes, newNotes: newNotes)
+    func updateOtherTitle(_ otherTitle: OtherTitle, title: String, ownedVolumes: Int16, notes: String) {
+        service.updateOtherTitle(otherTitle, title: title, ownedVolumes: ownedVolumes, notes: notes)
         fetchMangas()
     }
 
-    func deleteOtherTitle(manga: Manga, otherTitle: OtherTitle) {
-        otherTitleViewModel.deleteOtherTitle(manga: manga, otherTitle: otherTitle)
+    func deleteOtherTitle(_ otherTitle: OtherTitle) {
+        service.deleteOtherTitle(otherTitle)
         fetchMangas()
     }
 
-    // Graph関連処理の委譲
+    // MARK: - Graph
+
     func countTitlesByStatus() -> [PublicationStatus: Int] {
-        return graphViewModel.countTitlesByStatus(mangas: mangas)
+        GraphViewModel.countTitlesByStatus(mangas: mangas)
     }
 
     func countVolumesByStatus() -> [PublicationStatus: Int] {
-        return graphViewModel.countVolumesByStatus(mangas: mangas)
+        GraphViewModel.countVolumesByStatus(mangas: mangas)
     }
 }

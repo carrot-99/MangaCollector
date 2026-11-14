@@ -3,15 +3,16 @@
 import SwiftUI
 
 struct MangaListView: View {
-    var filteredMangas: [Manga]
-    var viewModel: MangaListViewModel
-    var deleteManga: (IndexSet) -> Void
+    var mangas: [Manga]
+    @ObservedObject var viewModel: MangaListViewModel
+    /// 削除確認を求める
+    var onDelete: ([Manga]) -> Void
 
     var body: some View {
         List {
-            ForEach(filteredMangas, id: \.self) { manga in
+            ForEach(mangas, id: \.objectID) { manga in
                 NavigationLink(destination: MangaDetailView(manga: manga, viewModel: viewModel)) {
-                    MangaRow(manga: manga, viewModel: viewModel)
+                    MangaRow(manga: manga)
                 }
                 .padding()
                 .background(RoundedRectangle(cornerRadius: 10)
@@ -19,23 +20,27 @@ struct MangaListView: View {
                 .padding(.horizontal)
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
+                .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                    Button {
+                        viewModel.incrementOwnedVolumes(of: manga)
+                    } label: {
+                        Label("+1巻", systemImage: "plus")
+                    }
+                    .tint(.blue)
+                }
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button(role: .destructive) {
+                        onDelete([manga])
+                    } label: {
+                        Label("削除", systemImage: "trash")
+                    }
+                }
             }
-            .onMove(perform: moveManga)
-            .onDelete(perform: deleteManga)
+            .onMove(perform: viewModel.canReorder ? viewModel.moveMangas : nil)
+            .onDelete { offsets in
+                onDelete(offsets.map { mangas[$0] })
+            }
         }
         .listStyle(.plain)
-    }
-    
-    private func moveManga(from source: IndexSet, to destination: Int) {
-        var reorderedMangas = filteredMangas
-        reorderedMangas.move(fromOffsets: source, toOffset: destination)
-
-        // 並べ替えた順序を Core Data に保存
-        for (index, manga) in reorderedMangas.enumerated() {
-            viewModel.updateOrder(for: manga, newOrder: Int16(index + 1)) // 1から始まる順序
-        }
-
-        // 並べ替え後のリストを更新
-        viewModel.fetchMangas()
     }
 }

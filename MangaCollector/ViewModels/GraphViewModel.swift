@@ -2,29 +2,15 @@
 
 import Foundation
 
-class GraphViewModel {
-    private let databaseService: DatabaseService
-
-    init(databaseService: DatabaseService) {
-        self.databaseService = databaseService
+/// 統計グラフ用の集計処理
+enum GraphViewModel {
+    static func countTitlesByStatus(mangas: [Manga]) -> [PublicationStatus: Int] {
+        Dictionary(grouping: mangas, by: \.status).mapValues(\.count)
     }
 
-    func countTitlesByStatus(mangas: [Manga]) -> [PublicationStatus: Int] {
-        var countDict: [PublicationStatus: Int] = [:]
-        for status in PublicationStatus.allCases {
-            let count = mangas.filter { $0.publicationStatus == status.rawValue }.count
-            countDict[status] = count
+    static func countVolumesByStatus(mangas: [Manga]) -> [PublicationStatus: Int] {
+        Dictionary(grouping: mangas, by: \.status).mapValues { group in
+            group.reduce(0) { $0 + Int($1.totalOwnedVolumes) }
         }
-        return countDict
-    }
-
-    func countVolumesByStatus(mangas: [Manga]) -> [PublicationStatus: Int] {
-        var countDict: [PublicationStatus: Int] = [:]
-        for status in PublicationStatus.allCases {
-            let totalVolumes = mangas.filter { $0.publicationStatus == status.rawValue }
-                                     .reduce(0) { $0 + Int($1.totalOwnedVolumes) }
-            countDict[status] = totalVolumes
-        }
-        return countDict
     }
 }

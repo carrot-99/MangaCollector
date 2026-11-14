@@ -3,31 +3,31 @@
 import SwiftUI
 
 struct OtherTitlesListView: View {
-    var manga: Manga
-    @State var showingAddOtherTitleDialog: Bool = false
-    @State var showingEditOtherTitleDialog: Bool = false
+    @ObservedObject var manga: Manga
     @ObservedObject var viewModel: MangaListViewModel
-    @Binding var newOtherTitleName: String
-    @Binding var newOtherTitleOwnedVolumes: Int16
-    @Binding var newOtherTitleNotes: String
-    @Binding var editingOtherTitle: OtherTitle?
-    @Binding var editedOtherTitleName: String
-    @Binding var editedOtherTitleOwnedVolumes: Int16
-    @Binding var editedOtherTitleNotes: String
-    
+
+    @State private var showingAddOtherTitleDialog = false
+    @State private var showingEditOtherTitleDialog = false
+    @State private var newOtherTitleName = ""
+    @State private var newOtherTitleOwnedVolumes: Int16 = 1
+    @State private var editingOtherTitle: OtherTitle?
+    @State private var editedOtherTitleName = ""
+    @State private var editedOtherTitleOwnedVolumes: Int16 = 1
+
     var body: some View {
         ListSectionView(
             title: "外伝など",
             items: manga.otherTitlesArray,
             onAdd: {
+                newOtherTitleName = ""
+                newOtherTitleOwnedVolumes = 1
                 showingAddOtherTitleDialog = true
             },
             onEdit: { otherTitle in
-                self.editingOtherTitle = otherTitle
-                self.editedOtherTitleName = otherTitle.title ?? ""
-                self.editedOtherTitleOwnedVolumes = otherTitle.ownedVolumes
-                self.editedOtherTitleNotes = otherTitle.notes ?? ""
-                self.showingEditOtherTitleDialog = true
+                editingOtherTitle = otherTitle
+                editedOtherTitleName = otherTitle.title ?? ""
+                editedOtherTitleOwnedVolumes = max(otherTitle.ownedVolumes, 1)
+                showingEditOtherTitleDialog = true
             }
         )
         .halfSheet(isPresented: $showingAddOtherTitleDialog) {
@@ -48,33 +48,27 @@ struct OtherTitlesListView: View {
             )
         }
     }
-    
+
     private func addOtherTitle() {
-        viewModel.addOtherTitle(to: manga, title: newOtherTitleName, ownedVolumes: newOtherTitleOwnedVolumes, notes: newOtherTitleNotes)
-        newOtherTitleName = ""
-        newOtherTitleOwnedVolumes = 1
-        newOtherTitleNotes = ""
+        let name = newOtherTitleName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return }
+        viewModel.addOtherTitle(to: manga, title: name, ownedVolumes: newOtherTitleOwnedVolumes, notes: "")
         showingAddOtherTitleDialog = false
     }
 
     private func updateOtherTitle() {
-        guard let editingOtherTitle = editingOtherTitle else { return }
-        viewModel.updateOtherTitle(
-            manga: manga,
-            otherTitle: editingOtherTitle,
-            newTitle: editedOtherTitleName,
-            newOwnedVolumes: editedOtherTitleOwnedVolumes,
-            newNotes: editedOtherTitleNotes
-        )
-        self.editingOtherTitle = nil
-        self.showingEditOtherTitleDialog = false
+        let name = editedOtherTitleName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let otherTitle = editingOtherTitle, !name.isEmpty else { return }
+        viewModel.updateOtherTitle(otherTitle, title: name, ownedVolumes: editedOtherTitleOwnedVolumes, notes: otherTitle.notes ?? "")
+        editingOtherTitle = nil
+        showingEditOtherTitleDialog = false
     }
-    
+
     private func deleteOtherTitle() {
         if let otherTitle = editingOtherTitle {
-            viewModel.deleteOtherTitle(manga: manga, otherTitle: otherTitle)
+            viewModel.deleteOtherTitle(otherTitle)
         }
-        self.editingOtherTitle = nil
-        self.showingEditOtherTitleDialog = false
+        editingOtherTitle = nil
+        showingEditOtherTitleDialog = false
     }
 }
