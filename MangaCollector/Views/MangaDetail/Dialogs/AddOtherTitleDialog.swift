@@ -9,6 +9,10 @@ struct AddOtherTitleDialog: View {
     var onAdd: () -> Void
     @Environment(\.colorScheme) var colorScheme
 
+    private var isNameEmpty: Bool {
+        newOtherTitleName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     private var backgroundColor: Color {
         colorScheme == .dark ? .black : .white
     }
@@ -32,6 +36,7 @@ struct AddOtherTitleDialog: View {
                         onAdd()
                         showingDialog = false
                     }
+                    .disabled(isNameEmpty)
                 )
                 .padding()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -53,6 +58,7 @@ struct AddOtherTitleDialog: View {
                     onAdd()
                     showingDialog = false
                 }
+                .disabled(isNameEmpty)
                 Spacer()
             }
             .padding()

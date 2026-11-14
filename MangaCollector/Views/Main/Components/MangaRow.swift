@@ -1,45 +1,62 @@
 //  MangaRow.swift
 
-import Foundation
 import SwiftUI
 
 struct MangaRow: View {
-    var manga: Manga
-    @ObservedObject var viewModel: MangaListViewModel
+    @ObservedObject var manga: Manga
 
     var body: some View {
-        HStack {
-            Text(PublicationStatus(rawValue: manga.publicationStatus)?.description ?? "不明")
-                .font(.caption)
-                .foregroundColor(PublicationStatus(rawValue: manga.publicationStatus)?.color)
-                .padding(5)
-                .background(PublicationStatus(rawValue: manga.publicationStatus)?.color.opacity(0.2))
-                .cornerRadius(5)
-            VStack(alignment: .leading) {
-                Text(manga.title ?? "Unknown Title")
-                    .font(.headline)
-                    .lineLimit(1)
+        HStack(spacing: 10) {
+            StatusBadge(status: manga.status)
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 4) {
+                    Text(manga.displayTitle)
+                        .font(.headline)
+                        .lineLimit(1)
+                    if manga.favorite {
+                        Image(systemName: "heart.fill")
+                            .font(.caption2)
+                            .foregroundColor(.red)
+                            .accessibilityLabel("お気に入り")
+                    }
+                }
                 if !manga.authorsArray.isEmpty {
-                    Text(manga.authorsArray.joined(separator: " / "))
+                    Text(manga.authorsText)
                         .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
+                if !manga.missingVolumeNumbers.isEmpty {
+                    Text("不足：\(manga.missingVolumeNumbers.volumeRangesDescription)")
+                        .font(.caption2)
+                        .foregroundColor(.orange)
                         .lineLimit(1)
                 }
             }
+
             Spacer()
-            VStack{
-                Text("総計：\(manga.calculatedOwnedVolumes)")
+
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("総計：\(manga.totalOwnedVolumes)")
                     .font(.headline)
                 Text("最新：\(manga.ownedVolumes)")
                     .font(.subheadline)
+                    .foregroundColor(.secondary)
             }
         }
-        .shadow(radius: 10)
     }
-    
-    private func authorsString(_ authors: NSSet?) -> String? {
-        guard let authorsSet = authors as? Set<Author>, !authorsSet.isEmpty else {
-            return nil
-        }
-        return authorsSet.map { $0.name ?? "不明" }.joined(separator: " / ")
+}
+
+struct StatusBadge: View {
+    let status: PublicationStatus
+
+    var body: some View {
+        Text(status.description)
+            .font(.caption)
+            .foregroundColor(status.color)
+            .padding(5)
+            .background(status.color.opacity(0.2))
+            .cornerRadius(5)
     }
 }

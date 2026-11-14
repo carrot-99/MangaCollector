@@ -5,7 +5,6 @@ import SwiftUI
 struct TitleView: View {
     @Binding var title: String
     @Binding var editingTitle: Bool
-    var onSave: () -> Void
     @Binding var currentAlert: AlertType?
 
     var body: some View {
@@ -20,7 +19,6 @@ struct TitleView: View {
                         if title.trimmingCharacters(in: .whitespaces).isEmpty {
                             currentAlert = .titleError
                         } else {
-                            onSave()
                             editingTitle = false
                         }
                     } else {
@@ -35,6 +33,7 @@ struct TitleView: View {
             HStack {
                 if editingTitle {
                     TextField("タイトル", text: $title)
+                        .submitLabel(.done)
                 } else {
                     Text(title)
                         .lineLimit(1)

@@ -11,7 +11,6 @@ struct AddMangaDialog: View {
     @State private var ownedVolumesText: String = ""
     @State private var selectedImage: UIImage?
     @State private var showingImagePicker = false
-    @State private var showTitleError = false
     
     // 巻数有効チェック
     private var isOwnedVolumesValid: Bool {
@@ -31,17 +30,6 @@ struct AddMangaDialog: View {
             Form {
                 Section(header: Text("基本情報")) {
                     TextField("タイトル*", text: $title)
-                        .onChange(of: title) { newValue in
-                            if !newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                showTitleError = false
-                            }
-                        }
-                    
-                    if showTitleError {
-                        Text("タイトルを入力してください")
-                            .foregroundColor(.red)
-                            .font(.caption)
-                    }
                     
                     Picker("連載状況", selection: $publicationStatus) {
                         ForEach(PublicationStatus.allCases) { status in
@@ -71,8 +59,9 @@ struct AddMangaDialog: View {
                             Image(uiImage: selectedImage)
                                 .resizable()
                                 .scaledToFit()
+                                .frame(maxHeight: 200)
                         } else {
-                            Text("画像を選択")
+                            Label("画像を選択", systemImage: "photo")
                         }
                     }
                 }
@@ -83,26 +72,20 @@ struct AddMangaDialog: View {
                 trailing: Button("追加") { addManga() }
                     .disabled(isAddButtonDisabled)
             )
-            .sheet(isPresented: $showingImagePicker, onDismiss: loadImage) {
+            .sheet(isPresented: $showingImagePicker) {
                 ImagePicker(image: $selectedImage)
             }
         }
     }
     
     private func addManga() {
-        let ownedVolumes = Int16(ownedVolumesText) ?? 1
-        let imageData = selectedImage?.jpegData(compressionQuality: 1.0)
+        let ownedVolumes = Int16(clamping: Int(ownedVolumesText) ?? 1)
         viewModel.addManga(
             title: title,
-            publicationStatus: publicationStatus.rawValue,
-            ownedVolumes: Int16(ownedVolumes),
-            image: imageData
+            publicationStatus: publicationStatus,
+            ownedVolumes: ownedVolumes,
+            image: selectedImage?.compressedJPEGData()
         )
         isPresented = false
-    }
-    
-    private func loadImage() {
-        guard let selectedImage = selectedImage else { return }
-        self.selectedImage = selectedImage
     }
 }

@@ -11,31 +11,51 @@ struct OwnedVolumesView: View {
         self._ownedVolumesText = State(initialValue: "\(ownedVolumes.wrappedValue)")
     }
 
+    private var isInputValid: Bool {
+        (Int(ownedVolumesText) ?? 0) > 0
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
             Label("最新巻", systemImage: "books.vertical")
                 .font(.caption)
                 .foregroundColor(.gray)
                 .padding(.bottom, 1)
-            
-            TextField("所持巻数", text: $ownedVolumesText)
-                .keyboardType(.numberPad) // 数字専用キーボードを使用
-                .onChange(of: ownedVolumesText) { newValue in
-                    // 入力値をフィルタリングして数値のみ許可
-                    ownedVolumesText = newValue.filter { $0.isNumber }
-                    
-                    // 有効な数値の場合のみ`ownedVolumes`に反映
-                    if let validNumber = Int(ownedVolumesText), validNumber > 0 {
-                        ownedVolumes = validNumber
+
+            HStack(spacing: 4) {
+                TextField("所持巻数", text: $ownedVolumesText)
+                    .keyboardType(.numberPad)
+                    .multilineTextAlignment(.center)
+                    .frame(minWidth: 40)
+                    .onChange(of: ownedVolumesText) { newValue in
+                        let filtered = String(newValue.filter(\.isNumber).prefix(4))
+                        if filtered != newValue {
+                            ownedVolumesText = filtered
+                        }
+                        if let number = Int(filtered), number > 0 {
+                            ownedVolumes = number
+                        }
                     }
+
+                // 新刊購入時にすぐ増やせるよう ± ボタンを用意
+                Stepper("最新巻", value: Binding(
+                    get: { ownedVolumes },
+                    set: { ownedVolumes = $0 }
+                ), in: 1...9999)
+                .labelsHidden()
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 12)
+            .background(RoundedRectangle(cornerRadius: 10)
+                .stroke(isInputValid ? Color.blue : Color.red, lineWidth: 2))
+            .onChange(of: ownedVolumes) { newValue in
+                if Int(ownedVolumesText) != newValue {
+                    ownedVolumesText = "\(newValue)"
                 }
-                .padding()
-                .padding(.vertical, 7)
-                .background(RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.blue, lineWidth: 2))
-            
-            if ownedVolumesText.isEmpty || (Int(ownedVolumesText) ?? 0) <= 0 {
-                Text("巻数は1以上の自然数で入力してください")
+            }
+
+            if !isInputValid {
+                Text("1以上の数字を入力してください")
                     .foregroundColor(.red)
                     .font(.caption)
             }

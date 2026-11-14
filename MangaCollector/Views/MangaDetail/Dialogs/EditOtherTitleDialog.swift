@@ -10,6 +10,10 @@ struct EditOtherTitleDialog: View {
     var onDelete: () -> Void
     @Environment(\.colorScheme) var colorScheme
 
+    private var isNameEmpty: Bool {
+        editedOtherTitleName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     private var backgroundColor: Color {
         colorScheme == .dark ? .black : .white
     }
@@ -95,6 +99,7 @@ struct EditOtherTitleDialog: View {
                 onSave()
                 showingDialog = false
             }
+            .disabled(isNameEmpty)
         }
     }
 }

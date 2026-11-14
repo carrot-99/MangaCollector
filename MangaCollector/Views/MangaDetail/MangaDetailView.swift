@@ -1,57 +1,63 @@
 //  MangaDetailView.swift
 
-import Foundation
 import SwiftUI
 
 struct MangaDetailView: View {
     @ObservedObject var viewModel: MangaListViewModel
-    // Mnaga
+    @ObservedObject var manga: Manga
+    @Environment(\.presentationMode) private var presentationMode
+
     @State private var title: String
-    @State private var editingTitle: Bool = false
-    @State private var editingVolumes: Bool = false
+    @State private var editingTitle = false
     @State private var ownedVolumes: Int
     @State private var publicationStatus: PublicationStatus
     @State private var notes: String
-    @State private var editingMemo: Bool = false
     @State private var isFavorite: Bool
     @State private var image: UIImage?
-    @State private var showingImagePicker = false
-    @State private var publisher: String = ""
-    // MissingVolume
-    @State private var showingAddMissingVolumeDialog = false
-    @State private var newMissingVolumeNumber: Int16 = 0
-    @State private var showingEditMissingVolumeDialog = false
-    @State private var editingVolume: MissingVolume?
-    @State private var editedVolumeNumber: Int16 = 0
-    // OtherTitle
-    @State private var showingAddOtherTitleDialog = false
-    @State private var newOtherTitleName: String = ""
-    @State private var newOtherTitleOwnedVolumes: Int16 = 0
-    @State private var newOtherTitleNotes: String = ""
-    @State private var showingEditOtherTitleDialog = false
-    @State private var editingOtherTitle: OtherTitle?
-    @State private var editedOtherTitleName: String = ""
-    @State private var editedOtherTitleOwnedVolumes: Int16 = 0
-    @State private var editedOtherTitleNotes: String = ""
+    @State private var imageChanged = false
+    @State private var publisher: String
+    @State private var missingVolumes: [Int]
 
+    @State private var showingImagePicker = false
+    @State private var showingMissingVolumesSelection = false
+    @State private var showingDiscardConfirmation = false
     @State private var currentAlert: AlertType?
-    var manga: Manga
 
     init(manga: Manga, viewModel: MangaListViewModel) {
         self.manga = manga
         self.viewModel = viewModel
         _title = State(initialValue: manga.title ?? "")
         _ownedVolumes = State(initialValue: Int(manga.ownedVolumes))
-        _publicationStatus = State(initialValue: PublicationStatus(rawValue: manga.publicationStatus) ?? .ongoing)
+        _publicationStatus = State(initialValue: manga.status)
         _notes = State(initialValue: manga.notes ?? "")
         _isFavorite = State(initialValue: manga.favorite)
+        _image = State(initialValue: manga.image.flatMap(UIImage.init(data:)))
+        _publisher = State(initialValue: manga.publisher ?? defaultPublisher)
+        _missingVolumes = State(initialValue: manga.missingVolumeNumbers)
+    }
 
-        if let imageData = manga.image {
-            _image = State(initialValue: UIImage(data: imageData))
-        } else {
-            _image = State(initialValue: nil)
-        }
-        _publisher = State(initialValue: manga.publisher ?? "")
+    /// 最新巻以下の不足巻のみ（最新巻を減らした場合の不整合を防ぐ）
+    private var validMissingVolumes: [Int] {
+        missingVolumes.filter { $0 >= 1 && $0 <= ownedVolumes }
+    }
+
+    private var totalOwnedVolumes: Int {
+        Manga.totalOwnedVolumes(latestVolume: ownedVolumes, missingVolumes: validMissingVolumes, otherTitles: manga.otherTitlesArray)
+    }
+
+    private var hasChanges: Bool {
+        title != (manga.title ?? "")
+            || ownedVolumes != Int(manga.ownedVolumes)
+            || publicationStatus != manga.status
+            || notes != (manga.notes ?? "")
+            || isFavorite != manga.favorite
+            || imageChanged
+            || publisher != (manga.publisher ?? defaultPublisher)
+            || validMissingVolumes != manga.missingVolumeNumbers
+    }
+
+    private var canSave: Bool {
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && ownedVolumes >= 1
     }
 
     var body: some View {
@@ -59,101 +65,142 @@ struct MangaDetailView: View {
             VStack {
                 // タイトル、お気に入り
                 HStack {
-                    TitleView(title: $title, editingTitle: $editingTitle, onSave: { editingTitle = false }, currentAlert: $currentAlert)
+                    TitleView(title: $title, editingTitle: $editingTitle, currentAlert: $currentAlert)
                     Spacer()
                     FavoriteView(isFavorite: $isFavorite)
                 }
-                
+
                 // 著者リスト
-//                AuthorsListView(manga: manga, authors: Array(manga.authors as? Set<Author> ?? []), viewModel: viewModel, currentAlert: $currentAlert)
-//                .frame(height: 100)
                 AuthorsListView(manga: manga)
-                
+
                 // 連載状況、最新巻
-                HStack {
+                HStack(alignment: .top) {
                     PublicationStatusView(publicationStatus: $publicationStatus)
                     Spacer()
                     OwnedVolumesView(ownedVolumes: $ownedVolumes)
                 }
                 .padding()
-                
+
+                // 総所有巻数
+                HStack {
+                    Label("総所有巻数", systemImage: "sum")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                    Spacer()
+                    Text("\(totalOwnedVolumes)巻")
+                        .font(.headline)
+                }
+                .padding(.horizontal, 32)
+
                 // 出版社
                 PublisherView(publisher: $publisher)
-                
-                // 不足巻数リスト
-                MissingVolumesListView(manga: manga, newMissingVolumeNumber: $newMissingVolumeNumber, editingVolume: $editingVolume, editedVolumeNumber: $editedVolumeNumber, viewModel: viewModel, ownedVolumes: $ownedVolumes, currentAlert: $currentAlert)
-                
-                // 外伝などリスト
-                OtherTitlesListView(manga: manga, viewModel: viewModel, newOtherTitleName: $newOtherTitleName, newOtherTitleOwnedVolumes: $newOtherTitleOwnedVolumes, newOtherTitleNotes: $newOtherTitleNotes, editingOtherTitle: $editingOtherTitle, editedOtherTitleName: $editedOtherTitleName, editedOtherTitleOwnedVolumes: $editedOtherTitleOwnedVolumes, editedOtherTitleNotes: $editedOtherTitleNotes)
-                
+
+                // 不足巻
+                MissingVolumesView(missingVolumes: validMissingVolumes) {
+                    showingMissingVolumesSelection = true
+                }
+
+                // 外伝など
+                OtherTitlesListView(manga: manga, viewModel: viewModel)
+
                 // 画像
                 ImageView(image: $image, showingImagePicker: $showingImagePicker)
-                
+
                 // メモ
                 MemoView(notes: $notes)
             }
-            .sheet(isPresented: $showingImagePicker) {
-                ImagePicker(image: $image)
-            }
-            .navigationBarTitle("\(title)", displayMode: .inline)
-            .navigationBarItems(trailing: Button("保存") {
-                saveChanges()
-            })
             .padding()
         }
         .padding(.bottom, 50)
+        .navigationBarTitle(title, displayMode: .inline)
+        .navigationBarBackButtonHidden(hasChanges)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                if hasChanges {
+                    Button(action: { showingDiscardConfirmation = true }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                            Text("戻る")
+                        }
+                    }
+                }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("保存") { saveChanges() }
+                    .font(.body.bold())
+                    .disabled(!hasChanges || !canSave)
+            }
+        }
+        .confirmationDialog("変更が保存されていません", isPresented: $showingDiscardConfirmation, titleVisibility: .visible) {
+            Button("保存して戻る") {
+                if saveChanges(showsAlert: false) {
+                    presentationMode.wrappedValue.dismiss()
+                }
+            }
+            .disabled(!canSave)
+            Button("変更を破棄", role: .destructive) {
+                presentationMode.wrappedValue.dismiss()
+            }
+            Button("キャンセル", role: .cancel) {}
+        }
+        .sheet(isPresented: $showingImagePicker) {
+            ImagePicker(image: $image)
+        }
+        .sheet(isPresented: $showingMissingVolumesSelection) {
+            MissingVolumesSelectionView(
+                ownedVolumes: ownedVolumes,
+                selectedVolumes: $missingVolumes
+            )
+        }
+        .onChange(of: image) { _ in
+            imageChanged = true
+        }
         .alert(item: $currentAlert) { alertType in
             switch alertType {
             case .saveSuccess:
                 return Alert(title: Text("保存しました"))
             case .saveFailure:
                 return Alert(title: Text("保存に失敗しました"))
-            case .duplicateVolume:
-                return Alert(
-                    title: Text("エラー"),
-                    message: Text("同じ巻数が既に存在します。"),
-                    dismissButton: .default(Text("OK"))
-                )
             case .titleError:
                 return Alert(
                     title: Text("エラー"),
                     message: Text("タイトルを入力してください。"),
                     dismissButton: .default(Text("OK"))
                 )
-            case .authorNameError:
-                return Alert(
-                    title: Text("エラー"),
-                    message: Text("著者名を入力してください。"),
-                    dismissButton: .default(Text("OK"))
-                )
             }
         }
     }
-    
-    private func calculatedOwnedVolumes() -> Int {
-        let missingVolumeCount = (manga.missingVolumes as? Set<MissingVolume>)?.count ?? 0
-        let otherTitlesOwnedVolumesTotal = manga.otherTitlesArray.reduce(0) { total, otherTitle in
-            total + Int(otherTitle.ownedVolumes)
-        }
-        let total = ownedVolumes + otherTitlesOwnedVolumesTotal - missingVolumeCount
-        return max(total, 0)
-    }
 
-    private func saveChanges() {
-        let imageData = image?.jpegData(compressionQuality: 1.0)
-        let totalOwnedVolumes = calculatedOwnedVolumes()
-        let updateSuccessful = viewModel.updateManga(
-            manga,
+    @discardableResult
+    private func saveChanges(showsAlert: Bool = true) -> Bool {
+        guard canSave else {
+            currentAlert = .titleError
+            return false
+        }
+        let imageData = imageChanged ? image?.compressedJPEGData() : manga.image
+        let draft = MangaDraft(
             title: title,
             authors: manga.authorsArray,
-            ownedVolumes: Int16(ownedVolumes),
-            publicationStatus: publicationStatus.rawValue,
+            ownedVolumes: ownedVolumes,
+            publicationStatus: publicationStatus,
             notes: notes,
             favorite: isFavorite,
             image: imageData,
             publisher: publisher,
-            totalOwnedVolumes: Int16(totalOwnedVolumes)
+            missingVolumes: validMissingVolumes
         )
-        currentAlert = updateSuccessful ? .saveSuccess : .saveFailure
+        let success = viewModel.updateManga(manga, with: draft)
+        if success {
+            editingTitle = false
+            imageChanged = false
+            title = manga.title ?? title
+            missingVolumes = manga.missingVolumeNumbers
+            if showsAlert {
+                currentAlert = .saveSuccess
+            }
+        } else {
+            currentAlert = .saveFailure
+        }
+        return success
     }
 }

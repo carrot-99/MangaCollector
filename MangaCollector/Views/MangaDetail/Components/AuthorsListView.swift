@@ -16,7 +16,7 @@ struct AuthorsListView: View {
 
                 Spacer()
 
-                Button(action: { isEditing.toggle() }) {
+                Button(action: toggleEditing) {
                     Image(systemName: isEditing ? "checkmark" : "pencil")
                 }
             }
@@ -25,6 +25,8 @@ struct AuthorsListView: View {
                 // 著者名を追加
                 HStack {
                     TextField("新しい著者名", text: $newAuthorName)
+                        .submitLabel(.done)
+                        .onSubmit(addAuthor)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     Button(action: addAuthor) {
                         Image(systemName: "plus")
@@ -50,17 +52,36 @@ struct AuthorsListView: View {
                 }
             } else {
                 // 通常表示
-                Text(manga.authorsArray.joined(separator: " / "))
+                Text(manga.authorsArray.isEmpty ? "未登録" : manga.authorsText)
                     .font(.body)
-                    .lineLimit(1)
+                    .foregroundColor(manga.authorsArray.isEmpty ? .gray : .primary)
+                    .lineLimit(2)
             }
         }
         .padding()
     }
 
+    /// 編集完了時に、入力途中の名前の追加・空欄の削除をして保存する
+    private func toggleEditing() {
+        if isEditing {
+            if !newAuthorName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                addAuthor()
+            }
+            let cleaned = manga.authorsArray
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+            if cleaned != manga.authorsArray {
+                manga.authorsArray = cleaned
+            }
+            saveContext()
+        }
+        isEditing.toggle()
+    }
+
     private func addAuthor() {
-        guard !newAuthorName.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-        manga.authorsArray.append(newAuthorName)
+        let name = newAuthorName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return }
+        manga.authorsArray.append(name)
         newAuthorName = ""
         saveContext()
     }

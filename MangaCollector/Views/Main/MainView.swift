@@ -4,219 +4,201 @@ import SwiftUI
 
 struct MainView: View {
     @ObservedObject var viewModel: MangaListViewModel
+    @AppStorage(UserDefaultsKey.displayMode) private var displayMode: DisplayMode = .list
     @State private var showingAddMangaDialog = false
-    @State private var filterOption: FilterOption = .all
-    @State private var displayMode: DisplayMode = .list
-    @State private var searchText = ""
-    @State private var showSearchBar = false
-    
-    var totalOwnedVolumes: Int {
-        filteredMangas.reduce(0) { total, manga in
-            total + Int(manga.totalOwnedVolumes)
-        }
+    @State private var showingSettings = false
+    @State private var mangasPendingDeletion: [Manga] = []
+    @State private var exportedFile: ExportedFile?
+
+    private var displayedMangas: [Manga] {
+        viewModel.displayedMangas
     }
 
-    var filteredMangas: [Manga] {
-        viewModel.mangas.filter { manga in
-            (searchText.isEmpty || manga.title?.localizedCaseInsensitiveContains(searchText) == true)
-        }.filter { manga in
-            switch filterOption {
-            case .all:
-                return true
-            case .ongoing:
-                return manga.publicationStatus == PublicationStatus.ongoing.rawValue
-            case .completed:
-                return manga.publicationStatus == PublicationStatus.completed.rawValue
-            case .incomplete:
-                return manga.publicationStatus == PublicationStatus.incomplete.rawValue
-            case .favorites:
-                return manga.favorite
-            }
-        }
+    private var totalOwnedVolumes: Int {
+        displayedMangas.reduce(0) { $0 + Int($1.totalOwnedVolumes) }
     }
-    
+
     var body: some View {
-        VStack {
-            // 総数
-            TotalVolumesView(totalVolumes: totalOwnedVolumes, totalTitles: filteredMangas.count, filterOption: filterOption, viewModel: viewModel)
-            
-            if showSearchBar {
-                SearchBar(text: $searchText).padding()
-            }
+        VStack(spacing: 0) {
+            TotalVolumesView(
+                totalVolumes: totalOwnedVolumes,
+                totalTitles: displayedMangas.count,
+                filterOption: viewModel.filterOption,
+                viewModel: viewModel
+            )
 
-            switch displayMode {
-            case .list:
-                MangaListView(
-                    filteredMangas: filteredMangas,
-                    viewModel: viewModel,
-                    deleteManga: deleteManga
-                )
-                    .padding(.bottom, 40)
-            case .icons:
-                MangaIconsView(mangas: filteredMangas, viewModel: viewModel)
-                    .padding(.bottom, 40)
+            content
+        }
+        .searchable(text: $viewModel.searchText, prompt: "タイトル・著者で検索")
+        .navigationBarTitle("漫画リスト", displayMode: .inline)
+        .toolbar {
+            ToolbarItemGroup(placement: .navigationBarLeading) {
+                Button(action: { showingSettings = true }) {
+                    Image(systemName: "gearshape")
+                }
+                .accessibilityLabel("設定")
+                if displayMode == .list && viewModel.canReorder && !viewModel.mangas.isEmpty {
+                    EditButton()
+                }
+            }
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                toolbarMenu
+                Button(action: { showingAddMangaDialog = true }) {
+                    Image(systemName: "plus")
+                }
+                .accessibilityLabel("漫画を追加")
             }
         }
-        .navigationBarTitle("漫画リスト", displayMode: .inline)
-        .navigationBarItems(leading: HStack {
-            addButton
-            if viewModel.sortOption == .defaultOrder && filterOption == .all {
-                EditButton()
-            }
-        }, trailing: toolbarMenu)
+        .background(
+            NavigationLink(destination: SettingsView(), isActive: $showingSettings) { EmptyView() }
+                .hidden()
+        )
         .sheet(isPresented: $showingAddMangaDialog) {
             AddMangaDialog(isPresented: $showingAddMangaDialog, viewModel: viewModel)
         }
-    }
-    
-    var addButton: some View {
-        Button(action: { showingAddMangaDialog = true }) {
-            Image(systemName: "plus")
+        .sheet(item: $exportedFile) { file in
+            ActivityView(activityItems: [file.url])
+        }
+        .alert(isPresented: Binding(
+            get: { !mangasPendingDeletion.isEmpty },
+            set: { if !$0 { mangasPendingDeletion = [] } }
+        )) {
+            Alert(
+                title: Text(deletionMessage),
+                message: Text("この操作は取り消せません。"),
+                primaryButton: .destructive(Text("削除")) {
+                    viewModel.deleteMangas(mangasPendingDeletion)
+                    mangasPendingDeletion = []
+                },
+                secondaryButton: .cancel(Text("キャンセル")) {
+                    mangasPendingDeletion = []
+                }
+            )
         }
     }
-    
-    var toolbarMenu: some View {
+
+    @ViewBuilder
+    private var content: some View {
+        if viewModel.mangas.isEmpty {
+            EmptyStateView(
+                systemImage: "books.vertical",
+                title: "まだ漫画が登録されていません",
+                message: "右上の＋ボタンから追加しましょう",
+                actionTitle: "漫画を追加",
+                action: { showingAddMangaDialog = true }
+            )
+        } else if displayedMangas.isEmpty {
+            EmptyStateView(
+                systemImage: "magnifyingglass",
+                title: "該当する作品がありません",
+                message: "検索条件やフィルタを変更してください",
+                actionTitle: "フィルタを解除",
+                action: {
+                    viewModel.filterOption = .all
+                    viewModel.searchText = ""
+                }
+            )
+        } else {
+            switch displayMode {
+            case .list:
+                MangaListView(
+                    mangas: displayedMangas,
+                    viewModel: viewModel,
+                    onDelete: { mangasPendingDeletion = $0 }
+                )
+                .padding(.bottom, 40)
+            case .icons:
+                MangaIconsView(mangas: displayedMangas, viewModel: viewModel)
+                    .padding(.bottom, 40)
+            }
+        }
+    }
+
+    private var deletionMessage: String {
+        if mangasPendingDeletion.count == 1, let manga = mangasPendingDeletion.first {
+            return "「\(manga.displayTitle)」を削除しますか？"
+        }
+        return "\(mangasPendingDeletion.count)作品を削除しますか？"
+    }
+
+    private var toolbarMenu: some View {
         Menu {
-            Button(showSearchBar ? "検索バーを隠す" : "検索バーを表示") {
-                showSearchBar.toggle()
+            Picker("表示", selection: $displayMode) {
+                ForEach(DisplayMode.allCases) { mode in
+                    Label(mode.description, systemImage: mode.systemImage).tag(mode)
+                }
             }
+
+            Menu {
+                Picker("フィルタ", selection: $viewModel.filterOption) {
+                    ForEach(FilterOption.allCases) { option in
+                        Text(option.description).tag(option)
+                    }
+                }
+            } label: {
+                Label("フィルタ：\(viewModel.filterOption.description)", systemImage: "line.3.horizontal.decrease.circle")
+            }
+
+            Menu {
+                Picker("並び替え", selection: $viewModel.sortOption) {
+                    ForEach(SortOption.allCases) { option in
+                        Text(option.description).tag(option)
+                    }
+                }
+            } label: {
+                Label("並び替え：\(viewModel.sortOption.description)", systemImage: "arrow.up.arrow.down")
+            }
+
             Divider()
-            filterMenu
-            Divider()
-            sortMenu
-            Divider()
-            displayModeMenu
+
+            Button(action: exportCSV) {
+                Label("CSVで書き出す", systemImage: "square.and.arrow.up")
+            }
+            .disabled(displayedMangas.isEmpty)
         } label: {
-            Image(systemName: "ellipsis.circle")
+            Image(systemName: viewModel.isFiltering ? "line.3.horizontal.decrease.circle.fill" : "ellipsis.circle")
         }
+        .accessibilityLabel("表示オプション")
     }
 
-    var filterMenu: some View {
-        Group {
-            Button("全作品") {
-                if filterOption != .all {
-                    filterOption = .all
-                }
-            }.disabled(filterOption == .all)
-            Button("お気に入り") {
-                if filterOption != .favorites {
-                    filterOption = .favorites
-                }
-            }.disabled(filterOption == .favorites)
-            Button("連載中") {
-                if filterOption != .ongoing {
-                    filterOption = .ongoing
-                }
-            }.disabled(filterOption == .ongoing)
-            Button("完結済み") {
-                if filterOption != .completed {
-                    filterOption = .completed
-                }
-            }.disabled(filterOption == .completed)
-            Button("未完結") {
-                if filterOption != .incomplete {
-                    filterOption = .incomplete
-                }
-            }.disabled(filterOption == .incomplete)
-        }
-    }
-
-    var sortMenu: some View {
-        Group {
-            Button("デフォルト順") {
-                if viewModel.sortOption != .defaultOrder {
-                    viewModel.sortOption = .defaultOrder
-                    viewModel.sortMangas()
-                }
-            }.disabled(viewModel.sortOption == .defaultOrder)
-            Button("タイトル昇順") {
-                if viewModel.sortOption != .titleAscending {
-                    viewModel.sortOption = .titleAscending
-                    viewModel.sortMangas()
-                }
-            }.disabled(viewModel.sortOption == .titleAscending)
-            Button("タイトル降順") {
-                if viewModel.sortOption != .titleDescending {
-                    viewModel.sortOption = .titleDescending
-                    viewModel.sortMangas()
-                }
-            }.disabled(viewModel.sortOption == .titleDescending)
-            Button("巻数昇順") {
-                if viewModel.sortOption != .volumeAscending {
-                    viewModel.sortOption = .volumeAscending
-                    viewModel.sortMangas()
-                }
-            }.disabled(viewModel.sortOption == .volumeAscending)
-            Button("巻数降順") {
-                if viewModel.sortOption != .volumeDescending {
-                    viewModel.sortOption = .volumeDescending
-                    viewModel.sortMangas()
-                }
-            }.disabled(viewModel.sortOption == .volumeDescending)
-        }
-    }
-
-    var displayModeMenu: some View {
-        Button(displayMode == .list ? "アイコン表示" : "リスト表示") {
-            displayMode = displayMode == .list ? .icons : .list
-        }
-    }
-    
-    private func deleteManga(at offsets: IndexSet) {
-        offsets.map { filteredMangas[$0] }.forEach { manga in
-            viewModel.deleteManga(manga)
-        }
-    }
-    
     private func exportCSV() {
-        let csvText = generateCSVText()
-        let activityController = UIActivityViewController(activityItems: [csvText], applicationActivities: nil)
-        UIApplication.shared.windows.first?.rootViewController?.present(activityController, animated: true, completion: nil)
+        let description = "\(viewModel.filterOption.description)・\(viewModel.sortOption.description)"
+        do {
+            let url = try CSVExporter.export(mangas: displayedMangas, conditionDescription: description)
+            exportedFile = ExportedFile(url: url)
+        } catch {
+            print("Error exporting CSV: \(error.localizedDescription)")
+        }
     }
-    
-    private func generateCSVText() -> String {
-        var csvText = "タイトル,所有巻数\n"
-        for manga in filteredMangas {
-            if let title = manga.title?.replacingOccurrences(of: ",", with: ";") {
-                let ownedVolumes = manga.totalOwnedVolumes
-                csvText += "\(title),\(ownedVolumes)\n"
+}
+
+struct EmptyStateView: View {
+    let systemImage: String
+    let title: String
+    let message: String
+    var actionTitle: String?
+    var action: (() -> Void)?
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Spacer()
+            Image(systemName: systemImage)
+                .font(.system(size: 48))
+                .foregroundColor(.secondary)
+            Text(title)
+                .font(.headline)
+            Text(message)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+            if let actionTitle = actionTitle, let action = action {
+                Button(actionTitle, action: action)
+                    .buttonStyle(.borderedProminent)
+                    .padding(.top, 4)
             }
+            Spacer()
         }
-
-        let filteredTotalOwnedVolumes = filteredMangas.reduce(0) { $0 + Int($1.totalOwnedVolumes) }
-        let filterDescription = filterOptionDescription()
-        let sortDescription = sortOptionDescription()
-        csvText += "\n\(filterDescription)、\(sortDescription)に基づいた総所有巻数: \(filteredTotalOwnedVolumes)"
-        return csvText
-    }
-    
-    private func filterOptionDescription() -> String {
-        switch filterOption {
-        case .all:
-            return "全作品"
-        case .ongoing:
-            return "連載中作品"
-        case .completed:
-            return "完結済作品"
-        case .incomplete:
-            return "未完結作品"
-        case .favorites:
-            return "お気に入り"
-        }
-    }
-
-    private func sortOptionDescription() -> String {
-        switch viewModel.sortOption {
-        case .defaultOrder:
-            return "登録順"
-        case .titleAscending:
-            return "タイトル昇順"
-        case .titleDescending:
-            return "タイトル降順"
-        case .volumeAscending:
-            return "巻数昇順"
-        case .volumeDescending:
-            return "巻数降順"
-        }
+        .padding()
+        .frame(maxWidth: .infinity)
     }
 }
